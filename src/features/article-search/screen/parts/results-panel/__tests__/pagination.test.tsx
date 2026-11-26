@@ -3,10 +3,21 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Pagination } from '../pagination';
 
+const noop = () => {};
+
 describe('Pagination', () => {
   it('shows the current page position', () => {
     render(
-      <Pagination page={1} totalPages={3} hasPrev hasNext onPrev={() => {}} onNext={() => {}} />,
+      <Pagination
+        page={1}
+        totalPages={3}
+        hasPrev
+        hasNext
+        busy={false}
+        onPrev={noop}
+        onNext={noop}
+        onJump={noop}
+      />,
     );
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
@@ -19,8 +30,10 @@ describe('Pagination', () => {
         totalPages={3}
         hasPrev={false}
         hasNext
-        onPrev={() => {}}
-        onNext={() => {}}
+        busy={false}
+        onPrev={noop}
+        onNext={noop}
+        onJump={noop}
       />,
     );
     expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled();
@@ -32,8 +45,10 @@ describe('Pagination', () => {
         totalPages={3}
         hasPrev
         hasNext={false}
-        onPrev={() => {}}
-        onNext={() => {}}
+        busy={false}
+        onPrev={noop}
+        onNext={noop}
+        onJump={noop}
       />,
     );
     expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
@@ -43,7 +58,18 @@ describe('Pagination', () => {
     const user = userEvent.setup();
     const onNext = vi.fn();
     const onPrev = vi.fn();
-    render(<Pagination page={1} totalPages={3} hasPrev hasNext onPrev={onPrev} onNext={onNext} />);
+    render(
+      <Pagination
+        page={1}
+        totalPages={3}
+        hasPrev
+        hasNext
+        busy={false}
+        onPrev={onPrev}
+        onNext={onNext}
+        onJump={noop}
+      />,
+    );
     await user.click(screen.getByRole('button', { name: /next/i }));
     await user.click(screen.getByRole('button', { name: /previous/i }));
     expect(onNext).toHaveBeenCalledOnce();

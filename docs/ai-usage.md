@@ -1,6 +1,6 @@
 # AI-assisted development reflection
 
-**Tools used.** I used Claude Code throughout — for scaffolding the Vite + TypeScript project, drafting components and tests, and reviewing diffs. I used it the way the exercise invites: to move faster on the parts that are mechanical, while keeping the technical decisions and the final code mine. Before writing anything, I used it to probe the Europe PMC API against the live endpoint so the design rested on verified behaviour rather than assumptions.
+**Tools used.** I used Claude Code for scaffolding the Vite + TypeScript project, drafting components and tests, and reviewing some diffs. I used it the way the exercise invites: to move faster on the parts that are mechanical, while keeping the technical decisions and the final code mine. Before writing anything, I used it to probe the Europe PMC API against the live endpoint so the design rested on verified behaviour rather than assumptions.
 
 **A suggestion I took.** When I described the "next / previous" requirement, the suggestion was to use TanStack Query's `useInfiniteQuery` and keep a small page pointer over the cached pages, rather than hand-roll a cursor stack. That fit the forward-only nature of the Europe PMC cursor well: fetch forward, move the pointer back for "Previous" so it never re-requests a page already seen. I took it because it removed state I would otherwise have had to keep in sync by hand, and it is easy to explain.
 

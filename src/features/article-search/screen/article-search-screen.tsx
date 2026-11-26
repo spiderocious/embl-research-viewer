@@ -18,8 +18,25 @@ export function ArticleSearchScreen() {
     syncPage(search.page);
   }, [search.page, syncPage]);
 
+  const resultsArea = (
+    <Show
+      when={search.status === 'success'}
+      fallback={
+        <StatusView
+          status={search.status === 'success' ? 'idle' : search.status}
+          query={query}
+          onRetry={search.retry}
+        />
+      }
+    >
+      <ResultsPanel search={search} />
+    </Show>
+  );
+
   return (
-    <div className="flex h-screen flex-col bg-white text-ink">
+    // Mobile/tablet: natural page flow (the page scrolls). Desktop: a fixed-height
+    // app shell where only the results pane scrolls internally.
+    <div className="flex min-h-[100dvh] flex-col bg-white text-ink lg:h-[100dvh] lg:min-h-0">
       <header className="shrink-0 bg-mast text-white">
         <div className="mx-auto flex max-w-5xl items-center gap-2 px-5 py-2.5 text-sm">
           <Logo />
@@ -41,25 +58,14 @@ export function ArticleSearchScreen() {
         </div>
       </div>
 
-      <main className="mx-auto grid min-h-0 w-full max-w-5xl flex-1 gap-8 px-5 py-6 lg:grid-cols-[22rem_1fr]">
-        <div className="min-h-0 overflow-y-auto lg:pr-1">
+      <main className="mx-auto grid w-full max-w-5xl flex-1 gap-8 px-5 py-6 lg:min-h-0 lg:grid-cols-[22rem_1fr]">
+        <div className="lg:min-h-0 lg:overflow-y-auto lg:pr-1">
           <QueryBuilder terms={terms} onChange={setTerms} />
         </div>
 
-        <div className="flex min-h-0 flex-col">
-          <Show
-            when={search.status === 'success'}
-            fallback={
-              <StatusView
-                status={search.status === 'success' ? 'idle' : search.status}
-                query={query}
-                onRetry={search.retry}
-              />
-            }
-          >
-            <ResultsPanel search={search} />
-          </Show>
-        </div>
+        {/* Mobile: fill the viewport once scrolled to, then scroll internally.
+            Desktop: fill the column height. */}
+        <div className="flex min-h-[calc(100dvh-2rem)] flex-col lg:min-h-0">{resultsArea}</div>
       </main>
     </div>
   );
