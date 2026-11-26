@@ -3,7 +3,7 @@
 A fast, accessible interface for searching the [Europe PMC](https://europepmc.org) literature corpus — 47 million biomedical and life-sciences publications. Build a query from plain keywords, combine them with **AND / OR / NOT**, and read and page through the results, without needing to know any search syntax.
 
 - **Live app:** https://emblresearchviewer.netlify.app/
-- **Technical documentation:** https://embl-research-tech-doc.netlify.app/
+- **Technical documentation:** https://voluble-lokum-f99f47.netlify.app//
 - **Repository:** https://github.com/spiderocious/embl-research-viewer
 
 ---
@@ -80,7 +80,7 @@ src/
 
 ### The pagination design
 
-The Europe PMC search cursor only moves forward — each response hands back a `nextCursorMark`, with no previous cursor and no page or offset parameter. So the app fetches forward with `useInfiniteQuery` and navigates backward with a page pointer over the cached pages, meaning **Previous never makes a request**. Jumping to a page walks the cursor forward to it. The full reasoning, with diagrams, is in the [technical documentation](https://embl-research-tech-doc.netlify.app/).
+The Europe PMC search cursor only moves forward — each response hands back a `nextCursorMark`, with no previous cursor and no page or offset parameter. So the app fetches forward with `useInfiniteQuery` and navigates backward with a page pointer over the cached pages, meaning **Previous never makes a request**. Jumping to a page walks the cursor forward to it. The full reasoning, with diagrams, is in the [technical documentation](https://voluble-lokum-f99f47.netlify.app//).
 
 ---
 
