@@ -14,8 +14,12 @@ export interface UseArticleSearchResult {
   readonly hasPrev: boolean;
   readonly hasNext: boolean;
   readonly isFetchingNext: boolean;
+  /** True while a page change is in flight (fetching a new page or walking to a jump target). */
+  readonly isNavigating: boolean;
   next: () => void;
   prev: () => void;
+  /** Jump to a 1-based page number, walking the forward cursor if needed. */
+  jumpTo: (oneBasedPage: number) => void;
   retry: () => void;
 }
 
@@ -96,9 +100,26 @@ export function useArticleSearch(query: string, initialPage = 0): UseArticleSear
     setPage((p) => Math.max(0, p - 1));
   }, []);
 
+  const jumpTo = useCallback(
+    (oneBasedPage: number) => {
+      const target = Math.min(Math.max(0, oneBasedPage - 1), Math.max(0, totalPages - 1));
+      if (target < pages.length) {
+        // already cached — move the pointer straight there
+        setPage(target);
+      } else {
+        // not loaded yet — let the walk effect fetch forward to it
+        setPage(target);
+        setTargetPage(target);
+      }
+    },
+    [pages.length, totalPages],
+  );
+
   const retry = useCallback(() => {
     void q.refetch();
   }, [q]);
+
+  const isNavigating = q.isFetchingNextPage || (targetPage > 0 && safePage !== targetPage);
 
   let status: SearchStatus;
   if (!enabled) status = 'idle';
@@ -116,8 +137,10 @@ export function useArticleSearch(query: string, initialPage = 0): UseArticleSear
     hasPrev,
     hasNext,
     isFetchingNext: q.isFetchingNextPage,
+    isNavigating,
     next,
     prev,
+    jumpTo,
     retry,
   };
 }

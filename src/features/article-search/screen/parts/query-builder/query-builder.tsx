@@ -130,8 +130,8 @@ export function QueryBuilder({ terms, onChange }: QueryBuilderProps) {
               )}
             </Repeat>
           </div>
-        </Show>
-      </div>
+        </div>
+      </Show>
 
       {/* Add a term */}
       <form onSubmit={addTerm} className="flex flex-col gap-2">
