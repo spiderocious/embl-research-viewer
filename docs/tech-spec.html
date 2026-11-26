@@ -1,0 +1,683 @@
+<title>Research Search Workspace — Tech Spec</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: an EMBL-EBI engineering spec. Dark masthead → petrol service band → single reading column
+   of ruled "record" sheets. Diagrams are inline SVG/CSS; depth folds away behind native <details>.
+   One deliberate look, light only (EMBL's web surface is light; matches standing preference). */
+:root{
+  color-scheme: light;
+  --petrol:#007C82; --petrol-dk:#005B60; --petrol-wash:#EAF5F5;
+  --blue:#3B6FB6; --blue-dk:#193F90;
+  --green:#18974C; --green-wash:#EAF5EE;
+  --amber:#9A6700; --amber-wash:#FBF3E3;
+  --violet:#6B4E9A; --violet-wash:#F1EDF7;
+  --bg:#FFFFFF; --bg-alt:#F5F6F5; --bg-mast:#2F322E; --bg-code:#1D201D;
+  --ink:#1A1C1A; --ink-2:#54585A; --ink-3:#767A78; --ink-4:#9AA09C;
+  --line:#D7DAD7; --line-soft:#E8EAE8;
+  --sans:"IBM Plex Sans",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --wrap:68rem;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;line-height:1.14;letter-spacing:-.01em;text-wrap:balance}
+p{margin:0}
+a{color:var(--blue);text-decoration:none}
+a:hover{color:var(--blue-dk);text-decoration:underline}
+strong,b{font-weight:600}
+code{font-family:var(--mono);font-size:.86em;background:var(--bg-alt);border:1px solid var(--line-soft);border-radius:4px;padding:.04em .34em;word-break:break-word}
+.gut{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ---------- masthead ---------- */
+.mast{background:var(--bg-mast);color:#fff;margin-top:calc(-1*env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + .66rem);padding-bottom:.66rem}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg-mast)}
+.mast-row{max-width:var(--wrap);margin:0 auto;display:flex;align-items:center;gap:.6rem;font-size:.8rem;letter-spacing:.015em}
+.mast-mark{width:20px;height:20px;flex:none;border-radius:3px;background:var(--petrol);display:grid;grid-template-columns:repeat(3,1fr);gap:1.6px;padding:3px}
+.mast-mark i{background:rgba(255,255,255,.88);border-radius:50%}
+.mast-mark i:nth-child(5){background:var(--green)}
+.mast-row b{font-weight:600}
+.mast-sep{color:#8d918b}
+.mast-row .right{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:#b9bdb7}
+
+/* ---------- service band ---------- */
+.svc{background:var(--petrol);color:#fff;padding-top:1.8rem;padding-bottom:2rem}
+.svc-in{max-width:var(--wrap);margin:0 auto}
+.svc .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);margin:0 0 .55rem}
+.svc h1{font-size:clamp(1.7rem,5.4vw,2.55rem);font-weight:600;letter-spacing:-.015em;margin:0}
+.svc .sub{margin:.75rem 0 0;max-width:52ch;color:rgba(255,255,255,.93);font-size:1.03rem}
+.meta-strip{max-width:var(--wrap);margin:1.35rem auto 0;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;font-size:.8rem;color:rgba(255,255,255,.9)}
+.meta-strip span{display:inline-flex;gap:.42rem;align-items:baseline}
+.meta-strip b{font-family:var(--mono);font-weight:500;color:#fff}
+
+/* ---------- layout ---------- */
+main{max-width:var(--wrap);margin:0 auto;padding-top:2rem;padding-bottom:4.5rem}
+
+/* contents */
+.toc{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 2.4rem}
+.toc a{display:inline-flex;align-items:center;gap:.5rem;font-size:.84rem;font-weight:500;color:var(--ink);background:var(--bg-alt);border:1px solid var(--line);border-radius:8px;padding:.35rem .7rem}
+.toc a:hover{background:var(--petrol-wash);border-color:var(--petrol);text-decoration:none}
+.toc a .n{font-family:var(--mono);font-size:.74rem;color:var(--petrol)}
+
+/* sheets */
+section.sheet{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:1.6rem 1.5rem;margin-bottom:1.5rem;scroll-margin-top:1rem}
+.sh{display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap;margin-bottom:.35rem}
+.rn{font-family:var(--mono);font-weight:600;font-size:.82rem;color:var(--petrol);letter-spacing:.05em;flex:none}
+.sh h2{font-size:1.4rem;font-weight:600}
+.sh .size{margin-left:auto;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:100px;padding:.14rem .6rem}
+.lede{color:var(--ink-2);margin:.15rem 0 1.2rem;max-width:68ch}
+h3.k{font-size:1.04rem;font-weight:600;margin:1.7rem 0 .7rem;display:flex;align-items:center;gap:.5rem}
+h3.k .bar{width:.7rem;height:.7rem;border-radius:2px;background:var(--petrol);flex:none}
+h4{font-size:.98rem;font-weight:600;margin:1.2rem 0 .5rem}
+.prose{max-width:70ch;color:var(--ink-2);display:flex;flex-direction:column;gap:.7rem}
+.prose b{color:var(--ink)}
+
+/* ---------- record rows ---------- */
+.rows{border-top:1px solid var(--line);margin:.8rem 0}
+.rec{display:grid;grid-template-columns:11rem 1fr;gap:.35rem 1.4rem;padding:.75rem 0;border-bottom:1px solid var(--line-soft);align-items:baseline}
+.rec .k{font-family:var(--mono);font-size:.76rem;color:var(--petrol-dk);letter-spacing:.02em;text-transform:uppercase}
+.rec .v{color:var(--ink-2)}
+.rec .v b{color:var(--ink)}
+
+/* ---------- callouts ---------- */
+.note{border-left:3px solid var(--petrol);background:var(--petrol-wash);padding:.85rem 1rem;border-radius:0 8px 8px 0;margin:1.1rem 0}
+.note.warn{border-left-color:var(--amber);background:var(--amber-wash)}
+.note.good{border-left-color:var(--green);background:var(--green-wash)}
+.note.ai{border-left-color:var(--violet);background:var(--violet-wash)}
+.note .tag{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--petrol-dk);display:block;margin-bottom:.3rem}
+.note.warn .tag{color:var(--amber)} .note.good .tag{color:var(--green)} .note.ai .tag{color:var(--violet)}
+.note p{margin:.25rem 0;color:var(--ink);max-width:66ch}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:36rem}
+th{text-align:left;font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding:.6rem .8rem;border-bottom:1px solid var(--line);background:var(--bg-alt)}
+td{padding:.6rem .8rem;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+td b{color:var(--ink)}
+tr:last-child td{border-bottom:0}
+td.mono,th.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- code ---------- */
+pre{background:var(--bg-code);color:#e4e7e4;border-radius:10px;padding:1rem 1.1rem;overflow-x:auto;margin:1rem 0;font-family:var(--mono);font-size:.82rem;line-height:1.62;-webkit-text-size-adjust:100%}
+pre .c{color:#8aa08a} pre .s{color:#7fd1c4} pre .k{color:#9bc7ff} pre .t{color:#d9b48a} pre .n{color:#e4a0a0}
+.file-cap{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin:1rem 0 -.4rem}
+
+/* ---------- accordions ---------- */
+details{border:1px solid var(--line);border-radius:10px;margin:.7rem 0;background:var(--bg);overflow:hidden}
+details[open]{border-color:var(--petrol);box-shadow:0 1px 0 var(--petrol-wash)}
+summary{list-style:none;cursor:pointer;padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem;font-weight:600;font-size:.96rem;background:var(--bg-alt)}
+summary::-webkit-details-marker{display:none}
+summary:hover{background:var(--petrol-wash)}
+summary:focus-visible{outline:2px solid var(--petrol);outline-offset:-2px}
+summary .chev{flex:none;width:1.1rem;height:1.1rem;color:var(--petrol);transition:transform .18s ease}
+details[open] summary .chev{transform:rotate(90deg)}
+summary .lbl-tag{font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;font-weight:500;border:1px solid var(--line);border-radius:100px;padding:.08rem .5rem}
+.det-body{padding:1rem 1.1rem;border-top:1px solid var(--line-soft)}
+.det-body>*:first-child{margin-top:0}
+.det-body>*:last-child{margin-bottom:0}
+
+/* ---------- decision list ---------- */
+.decs{display:grid;gap:.6rem;margin:1rem 0}
+.dec{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:start;border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem}
+.dec .d{font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--petrol);border-radius:6px;padding:.25rem .5rem;white-space:nowrap;align-self:start}
+.dec.alt .d{background:var(--ink-3)}
+.dec b{font-weight:600}
+.dec .why{display:block;color:var(--ink-2);font-size:.9rem;margin-top:.2rem}
+
+/* ---------- pills ---------- */
+.pills{display:flex;flex-wrap:wrap;gap:.45rem;margin:.9rem 0}
+.pill{font-family:var(--mono);font-size:.74rem;letter-spacing:.02em;padding:.22rem .62rem;border-radius:100px;border:1px solid var(--line);color:var(--ink-2);background:var(--bg)}
+.pill.on{border-color:var(--petrol);color:var(--petrol-dk);background:var(--petrol-wash)}
+.pill.stretch{border-color:var(--amber);color:var(--amber);background:var(--amber-wash)}
+
+/* ---------- diagram frame ---------- */
+.diagram{border:1px solid var(--line);border-radius:12px;background:var(--bg-alt);padding:1.1rem;margin:1.1rem 0;overflow-x:auto}
+.diagram .cap{font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.diagram .cap .dot{width:.5rem;height:.5rem;border-radius:50%;background:var(--petrol);flex:none}
+.diagram svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.diagram text{font-family:var(--sans)}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem 1.1rem;margin-top:.9rem;font-size:.76rem;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:.4rem}
+.legend i{width:.75rem;height:.75rem;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.08)}
+
+/* flow node strip (CSS, horizontal, scrolls) */
+.flow{display:flex;gap:.5rem;align-items:stretch;overflow-x:auto;padding:.2rem .1rem .6rem}
+.fnode{flex:none;width:11rem;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:.7rem .8rem;font-size:.82rem;color:var(--ink-2);line-height:1.45}
+.fnode b{display:block;color:var(--ink);font-size:.84rem;margin-bottom:.25rem}
+.fnode .step{font-family:var(--mono);font-size:.64rem;color:var(--petrol);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:.3rem}
+.fnode.ui{background:var(--petrol-wash);border-color:var(--petrol)}
+.fnode.data{background:#fff}
+.fnode.cache{background:var(--green-wash);border-color:#bfe3cd}
+.farrow{flex:none;align-self:center;color:var(--ink-4);font-family:var(--mono);font-weight:600}
+
+/* component tree */
+.tree{font-family:var(--mono);font-size:.82rem;line-height:1.85;color:var(--ink-2);overflow-x:auto}
+.tree .c-comp{color:var(--petrol-dk);font-weight:600}
+.tree .c-hook{color:var(--blue-dk)}
+.tree .c-util{color:var(--violet)}
+.tree .c-note{color:var(--ink-4)}
+
+/* state badges in a mini state machine */
+.states{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0}
+.st{border:1px solid var(--line);border-radius:8px;padding:.5rem .7rem;font-size:.82rem;min-width:8rem}
+.st .nm{font-family:var(--mono);font-weight:600;font-size:.78rem;display:block;margin-bottom:.2rem}
+.st.loading{border-left:3px solid var(--blue)} .st.loading .nm{color:var(--blue-dk)}
+.st.empty{border-left:3px solid var(--ink-3)} .st.empty .nm{color:var(--ink-2)}
+.st.error{border-left:3px solid #C0392B} .st.error .nm{color:#C0392B}
+.st.ok{border-left:3px solid var(--green)} .st.ok .nm{color:var(--green)}
+
+ul.clean{margin:.5rem 0;padding-left:1.2rem;color:var(--ink-2);display:flex;flex-direction:column;gap:.4rem}
+ul.clean b{color:var(--ink)}
+ul.clean li::marker{color:var(--petrol)}
+
+.foot{border-top:1px solid var(--line);margin-top:2.6rem;padding-top:1.3rem;color:var(--ink-3);font-size:.85rem;display:flex;flex-direction:column;gap:.3rem}
+.foot .mono{font-family:var(--mono);color:var(--ink-2)}
+
+@media (max-width:640px){
+  .rec{grid-template-columns:1fr;gap:.1rem}
+  .dec{grid-template-columns:1fr}
+  .toc a{font-size:.8rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="mast">
+  <div class="mast-row gut">
+    <span class="mast-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <b>EMBL-EBI</b><span class="mast-sep">·</span><span>Europe PMC</span>
+    <span class="mast-sep">·</span><span>Candidate technical exercise</span>
+    <span class="right">JR4637</span>
+  </div>
+</header>
+
+<div class="svc">
+  <div class="svc-in gut">
+    <p class="eyebrow">Technical specification</p>
+    <h1>Research Search Workspace</h1>
+    <p class="sub">The engineering design for a Europe PMC literature-search prototype — architecture, data flow, the pagination mechanism, component contracts, state and test design. Written before the build; everything here is explainable and owned.</p>
+  </div>
+  <div class="meta-strip gut">
+    <span>Stack <b>React · TS · Vite</b></span>
+    <span>Style <b>Tailwind</b></span>
+    <span>Data <b>TanStack Query</b></span>
+    <span>Tests <b>Vitest · RTL · MSW</b></span>
+    <span>Arch <b>Feature-Sliced</b></span>
+    <span>Deploy <b>GitHub → Netlify</b></span>
+  </div>
+</div>
+
+<main class="gut">
+
+  <nav class="toc" aria-label="Contents">
+    <a href="#problem"><span class="n">01</span> Problem &amp; scope</a>
+    <a href="#api"><span class="n">02</span> API model</a>
+    <a href="#arch"><span class="n">03</span> Architecture</a>
+    <a href="#pagination"><span class="n">04</span> Pagination mechanism</a>
+    <a href="#query"><span class="n">05</span> Query builder</a>
+    <a href="#state"><span class="n">06</span> State &amp; data flow</a>
+    <a href="#a11y"><span class="n">07</span> Accessibility</a>
+    <a href="#testing"><span class="n">08</span> Test design</a>
+    <a href="#decisions"><span class="n">09</span> Decisions &amp; trade-offs</a>
+    <a href="#delivery"><span class="n">10</span> Delivery &amp; AI use</a>
+  </nav>
+
+  <!-- 01 ============================================================= -->
+  <section class="sheet" id="problem">
+    <div class="sh"><span class="rn">01</span><h2>Problem &amp; scope</h2><span class="size">Context</span></div>
+    <p class="lede">A researcher wants to build and refine a literature search over Europe PMC without learning its query syntax, then read and page through the results. The prototype has two halves and a short list of things it deliberately does not do.</p>
+
+    <div class="rows">
+      <div class="rec"><span class="k">Half A</span><div class="v"><b>Query builder.</b> Enter a keyword or phrase. Combine terms with AND / OR / NOT. Show the query as it is constructed. Remove terms and refine.</div></div>
+      <div class="rec"><span class="k">Half B</span><div class="v"><b>Results explorer.</b> Fetch matching publications. Show title, authors, year, article link. 25 per page, next / previous. Loading, empty and error states, accessibly.</div></div>
+      <div class="rec"><span class="k">Graded on</span><div class="v">Functional correctness · maintainable components &amp; clear state · async handling · tests for query construction, navigation, API failure · <b>how work is prioritised</b>.</div></div>
+      <div class="rec"><span class="k">Hard constraint</span><div class="v">~3 hours. A well-reasoned partial beats a feature-complete app that can't be explained. A follow-up interview walks the code and may ask for a live change.</div></div>
+    </div>
+
+    <h3 class="k"><span class="bar"></span>In scope, out of scope</h3>
+    <div class="pills">
+      <span class="pill on">Query builder</span>
+      <span class="pill on">Results list</span>
+      <span class="pill on">Next / prev</span>
+      <span class="pill on">Loading · empty · error</span>
+      <span class="pill on">Accessibility</span>
+      <span class="pill on">Tests</span>
+      <span class="pill stretch">Facet rail</span>
+      <span class="pill stretch">Sort control</span>
+      <span class="pill stretch">Abstract detail view</span>
+    </div>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Why the facet rail is a stretch goal, not core<span class="lbl-tag">prioritisation</span></summary>
+      <div class="det-body">
+        <p class="prose">Europe PMC's own results page carries a left rail of filters — free full-text, article type, date — and a relevance / date / cited sort. They are useful, and the design leaves room for them. But the brief asks for the query builder, results and pagination; it does not ask for facets. In a three-hour exercise the clearest way to over-scope is to build what wasn't asked for while the graded core is still thin. So facets sit behind the core and ship only if time remains. This choice is itself part of what's being assessed: the brief names prioritisation twice.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 02 ============================================================= -->
+  <section class="sheet" id="api">
+    <div class="sh"><span class="rn">02</span><h2>API model</h2><span class="size">Verified live</span></div>
+    <p class="lede">Every value below was confirmed against the live endpoint, not recalled. The findings here shape the architecture that follows — above all the shape of pagination.</p>
+
+    <p class="file-cap">endpoint</p>
+    <pre><span class="k">GET</span> https://www.ebi.ac.uk/europepmc/webservices/rest/search
+      ?<span class="s">query</span>=cancer AND immunotherapy NOT melanoma
+      &amp;<span class="s">format</span>=json
+      &amp;<span class="s">pageSize</span>=25
+      &amp;<span class="s">cursorMark</span>=*            <span class="c">// "*" for the first page</span>
+<span class="c">// No auth, no backend, CORS-friendly for a browser app.</span></pre>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>Param</th><th>Role</th><th>Verified behaviour</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">query</td><td>Boolean search string</td><td>AND/OR/NOT applied literally. Hit count fell <b>5,670,102 → 280,474</b> when <code>AND immunotherapy NOT melanoma</code> was added, so operators really filter.</td></tr>
+          <tr><td class="mono">pageSize</td><td>Results per page</td><td><code>25</code> — matches the brief exactly.</td></tr>
+          <tr><td class="mono">cursorMark</td><td>Pagination token</td><td><code>*</code> first; thereafter the <code>nextCursorMark</code> from the previous response. <b>Forward only.</b></td></tr>
+          <tr><td class="mono">resultType</td><td>Field depth</td><td><code>lite</code> (default) returns title, authorString, pubYear, id, source — enough for the list. <code>core</code> adds authorList + abstract for a later detail view.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="file-cap">response — trimmed to what the list consumes</p>
+    <pre>{ <span class="s">"hitCount"</span>: <span class="t">280474</span>,
+  <span class="s">"nextCursorMark"</span>: <span class="s">"AoIIQEV1pCg1Njk3NTY2Nw=="</span>,   <span class="c">// feed back to get the next page</span>
+  <span class="s">"resultList"</span>: { <span class="s">"result"</span>: [
+    { <span class="s">"id"</span>: <span class="s">"42888301"</span>, <span class="s">"source"</span>: <span class="s">"MED"</span>,
+      <span class="s">"title"</span>: <span class="s">"…"</span>, <span class="s">"authorString"</span>: <span class="s">"van Meenen DMP, Hemmes SNT…"</span>,
+      <span class="s">"pubYear"</span>: <span class="s">"2026"</span>, <span class="s">"doi"</span>: <span class="s">"10.1007/…"</span>, <span class="s">"pmid"</span>: <span class="s">"42888301"</span> }
+  ] } }</pre>
+
+    <div class="note">
+      <span class="tag">The decisive finding</span>
+      <p>Pagination is a forward-only cursor. The response gives a <code>nextCursorMark</code>; there is <b>no previous cursor and no page or offset parameter</b>. "Previous" navigation therefore has to be a client concern. Section 04 draws the mechanism.</p>
+    </div>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Error reality — the API accepts bad input<span class="lbl-tag">shapes the error test</span></summary>
+      <div class="det-body">
+        <p class="prose"><b>Observed:</b> an empty query returns HTTP 200. A malformed query (an unbalanced parenthesis, <code>cancer AND (immuno</code>) also returns HTTP 200 with results. So the API will not hand back a clean 4xx for a bad query.</p>
+        <p class="prose" style="margin-top:.6rem"><b>Consequence:</b> genuine failures are network failures — a rejected fetch, a non-2xx response, a timeout. The error state and its test are built around those, not around the API rejecting a query. An empty or whitespace query is caught on the client before a request is ever made.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Building the article link<span class="lbl-tag">per result</span></summary>
+      <div class="det-body">
+        <p class="prose">Each result carries <code>source</code> (e.g. <code>MED</code>, <code>PMC</code>, <code>PPR</code>) and <code>id</code>. The canonical public URL is <code>https://europepmc.org/article/{source}/{id}</code> — e.g. <code>europepmc.org/article/MED/42888301</code>. The list links each title there, opening in a new tab.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 03 ============================================================= -->
+  <section class="sheet" id="arch">
+    <div class="sh"><span class="rn">03</span><h2>Architecture</h2><span class="size">Structure</span></div>
+    <p class="lede">Feature-Sliced Design: the app is one feature, <code>article-search</code>, that owns its screen, parts, API hook and helpers. Beneath it sit the standard layers — pure helpers, a shared API client, a React-Query data hook, and presentational parts on top. Each layer is testable without the one above it.</p>
+
+    <div class="diagram">
+      <div class="cap"><span class="dot"></span>Layered architecture — top to bottom</div>
+      <svg viewBox="0 0 720 348" role="img" aria-label="Four architectural layers: screen and parts, data hook, shared API client, and pure helpers.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#767A78"/></marker>
+        </defs>
+        <!-- Presentation -->
+        <rect x="20" y="16" width="680" height="64" rx="10" fill="#EAF5F5" stroke="#007C82"/>
+        <text x="40" y="40" font-size="13" font-weight="600" fill="#005B60">SCREEN + PARTS — features/article-search</text>
+        <text x="40" y="60" font-size="12" fill="#54585A">query-builder · results-panel (ResultRow · Pagination · StatusView) — Tailwind · meemaw Show/Repeat</text>
+        <!-- Data -->
+        <rect x="20" y="100" width="680" height="64" rx="10" fill="#FFFFFF" stroke="#D7DAD7"/>
+        <text x="40" y="124" font-size="13" font-weight="600" fill="#193F90">api/ — TanStack Query hook</text>
+        <text x="40" y="144" font-size="12" fill="#54585A">useArticleSearch()  ·  useInfiniteQuery keyed on query  ·  cache · status · dedupe</text>
+        <!-- Client -->
+        <rect x="20" y="184" width="680" height="60" rx="10" fill="#FFFFFF" stroke="#D7DAD7"/>
+        <text x="40" y="208" font-size="13" font-weight="600" fill="#1A1C1A">shared/services — API CLIENT</text>
+        <text x="40" y="227" font-size="12" fill="#54585A">apiClient.get(EP.EUROPE_PMC.SEARCH) → typed SearchResponse  ·  fetch + AbortController</text>
+        <!-- Pure logic -->
+        <rect x="20" y="264" width="680" height="60" rx="10" fill="#F1EDF7" stroke="#6B4E9A"/>
+        <text x="40" y="288" font-size="13" font-weight="600" fill="#6B4E9A">helpers/ — PURE, no React, no network</text>
+        <text x="40" y="307" font-size="12" fill="#54585A">build-display-query · build-api-query · build-article-url — one file each</text>
+        <!-- arrows -->
+        <line x1="360" y1="80" x2="360" y2="98" stroke="#767A78" stroke-width="1.5" marker-end="url(#ah)"/>
+        <line x1="360" y1="164" x2="360" y2="182" stroke="#767A78" stroke-width="1.5" marker-end="url(#ah)"/>
+        <line x1="360" y1="244" x2="360" y2="262" stroke="#767A78" stroke-width="1.5" marker-end="url(#ah)"/>
+      </svg>
+      <div class="legend">
+        <span><i style="background:#EAF5F5;border-color:#007C82"></i>Screen + parts (React)</span>
+        <span><i style="background:#fff"></i>api/ + shared client</span>
+        <span><i style="background:#F1EDF7;border-color:#6B4E9A"></i>Pure helpers (unit-tested alone)</span>
+      </div>
+    </div>
+
+    <h3 class="k"><span class="bar"></span>Feature-Sliced layout</h3>
+    <div class="diagram">
+      <div class="cap"><span class="dot"></span>src/ — one feature, shallow nesting</div>
+<pre class="tree"><span class="c">src/</span>
+├─ features/<span class="c-comp">article-search/</span>
+│  ├─ screen/
+│  │  ├─ <span class="c-comp">article-search-screen.tsx</span>   <span class="c-note">composition root — reads like a TOC</span>
+│  │  └─ parts/
+│  │     ├─ <span class="c-comp">query-builder/</span>            <span class="c-note">TermInput · TermChip · QueryPreview</span>
+│  │     ├─ <span class="c-comp">results-panel/</span>            <span class="c-note">ResultsHeader · ResultsList · ResultRow · Pagination</span>
+│  │     ├─ <span class="c-comp">status-view/</span>              <span class="c-note">loading · empty · error (status prop)</span>
+│  │     └─ __tests__/
+│  ├─ api/
+│  │  └─ <span class="c-hook">use-article-search.ts</span>       <span class="c-note">useInfiniteQuery — React Query only</span>
+│  ├─ helpers/                        <span class="c-note">pure, one per file</span>
+│  │  ├─ <span class="c-util">build-display-query.ts</span>
+│  │  ├─ <span class="c-util">build-api-query.ts</span>
+│  │  ├─ <span class="c-util">build-article-url.ts</span>
+│  │  └─ <span class="c-util">url-terms.ts</span>             <span class="c-note">encode/decode terms for the URL (pure)</span>
+│  ├─ utils/
+│  │  └─ <span class="c-hook">use-url-state.ts</span>            <span class="c-note">query + page ↔ URL (shareable links)</span>
+│  └─ <span class="c-util">article-search.types.ts</span>       <span class="c-note">Term · SearchResponse · ArticleResult</span>
+├─ shared/
+│  ├─ services/<span class="c-hook">api-client.ts</span>          <span class="c-note">the one fetch wrapper — no fetch in components</span>
+│  ├─ constants/<span class="c-util">endpoints.ts</span>         <span class="c-note">EP.EUROPE_PMC.SEARCH</span>
+│  └─ test-utils/                     <span class="c-note">MSW server + handlers</span>
+└─ ui/
+   ├─ icons/<span class="c-util">index.ts</span>                <span class="c-note">@icons proxy — export * from lucide-react</span>
+   └─ components/<span class="c-comp">logo/</span>               <span class="c-note">EMBL-EBI mark, its own component</span></pre>
+    </div>
+
+    <p class="prose"><b>The split that matters:</b> the <code>build-*</code> helpers are pure, one per file, so the builder's logic is verified by calling them directly — no React, no network. <code>status-view</code> is one part driven by a status prop, not three near-duplicate blocks. <code>ResultRow</code> takes a plain article object as a <code>Readonly</code> props interface and renders no logic, so it is trivial to test and to restyle. No component calls <code>fetch</code>; data flows only through the <code>api/</code> hook.</p>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Standards this build follows<span class="lbl-tag">team persona</span></summary>
+      <div class="det-body">
+        <ul class="clean">
+          <li><b>Feature-Sliced Design</b> — one <code>article-search</code> feature, shallow nesting since there is a single screen.</li>
+          <li><b>Tailwind only</b>, EMBL brand tokens in <code>tailwind.config</code>; conditional classes through <code>cn()</code>.</li>
+          <li><b>meemaw</b> <code>&lt;Show&gt;</code> / <code>&lt;Repeat&gt;</code> instead of <code>&amp;&amp;</code> and <code>.map()</code>.</li>
+          <li><b>Icons via the <code>@icons</code> proxy</b> (lucide-react), never emoji, never a direct import.</li>
+          <li><b>No <code>any</code></b>; every component's props are an externalised <code>Readonly&lt;…Props&gt;</code> interface.</li>
+          <li><b>React Query only</b> for server state; zero bare <code>useEffect + fetch</code>.</li>
+          <li><b>Endpoints via <code>EP</code> constants</b>, no inline URLs; hyphenated filenames; a feature-boundary barrel only.</li>
+          <li><b>Inline errors</b> over toasts.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <!-- 04 ============================================================= -->
+  <section class="sheet" id="pagination">
+    <div class="sh"><span class="rn">04</span><h2>Pagination mechanism</h2><span class="size">The hard part</span></div>
+    <p class="lede">The API moves only forward, one cursor at a time, yet the brief wants discrete next <em>and</em> previous pages of 25. The resolution: fetch forward, navigate backward through the cache. TanStack Query's <code>useInfiniteQuery</code> is built for exactly this cursor shape.</p>
+
+    <div class="diagram">
+      <div class="cap"><span class="dot"></span>Forward fetch, backward navigation — a page pointer over cached pages</div>
+      <svg viewBox="0 0 720 262" role="img" aria-label="Three cached pages each fetched with a cursor mark; a page pointer moves left and right over them; Next fetches a new page, Previous moves the pointer back without a request.">
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#007C82"/></marker>
+          <marker id="ah3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#767A78"/></marker>
+        </defs>
+        <!-- cached pages -->
+        <g>
+          <rect x="30" y="70" width="180" height="76" rx="10" fill="#EAF5EE" stroke="#18974C"/>
+          <text x="46" y="94" font-size="12" font-weight="600" fill="#18974C">Page 0 · cached</text>
+          <text x="46" y="114" font-size="11" font-family="monospace" fill="#54585A">cursor "*"</text>
+          <text x="46" y="132" font-size="11" fill="#54585A">25 results</text>
+
+          <rect x="268" y="70" width="180" height="76" rx="10" fill="#EAF5EE" stroke="#18974C"/>
+          <text x="284" y="94" font-size="12" font-weight="600" fill="#18974C">Page 1 · cached</text>
+          <text x="284" y="114" font-size="11" font-family="monospace" fill="#54585A">cursor AoII…951</text>
+          <text x="284" y="132" font-size="11" fill="#54585A">25 results</text>
+
+          <rect x="506" y="70" width="180" height="76" rx="10" fill="#FFFFFF" stroke="#007C82" stroke-dasharray="4 3"/>
+          <text x="522" y="94" font-size="12" font-weight="600" fill="#005B60">Page 2 · on Next</text>
+          <text x="522" y="114" font-size="11" font-family="monospace" fill="#54585A">cursor AoII…491</text>
+          <text x="522" y="132" font-size="11" fill="#54585A">fetch forward</text>
+        </g>
+        <!-- forward fetch arrows -->
+        <line x1="210" y1="108" x2="266" y2="108" stroke="#767A78" stroke-width="1.5" marker-end="url(#ah3)"/>
+        <line x1="448" y1="108" x2="504" y2="108" stroke="#007C82" stroke-width="1.6" marker-end="url(#ah2)"/>
+        <text x="455" y="60" font-size="10.5" font-family="monospace" fill="#007C82">Next → fetch</text>
+        <text x="218" y="60" font-size="10.5" font-family="monospace" fill="#767A78">nextCursorMark</text>
+        <!-- pointer -->
+        <rect x="268" y="176" width="180" height="40" rx="8" fill="#007C82"/>
+        <text x="358" y="201" font-size="12" font-weight="600" fill="#fff" text-anchor="middle">page pointer = 1</text>
+        <path d="M358 170 L348 176 L368 176 Z" fill="#007C82"/>
+        <!-- prev arrow (pointer only) -->
+        <path d="M268 196 C 200 196, 140 170, 120 150" stroke="#767A78" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#ah3)"/>
+        <text x="120" y="188" font-size="10.5" font-family="monospace" fill="#767A78">← Prev = move pointer, no request</text>
+      </svg>
+      <div class="legend">
+        <span><i style="background:#EAF5EE;border-color:#18974C"></i>Cached page (instant)</span>
+        <span><i style="background:#fff;border-color:#007C82"></i>Fetched on Next</span>
+        <span><i style="background:#007C82"></i>Page pointer</span>
+      </div>
+    </div>
+
+    <h3 class="k"><span class="bar"></span>Rules the hook enforces</h3>
+    <ul class="clean">
+      <li><b>Next:</b> if the next page is already cached, move the pointer forward; otherwise call <code>fetchNextPage()</code>, which sends the stored <code>nextCursorMark</code>.</li>
+      <li><b>Previous:</b> decrement the pointer. The page is always already cached, so there is no request and no spinner.</li>
+      <li><b>Last page:</b> known from <code>hitCount</code> and the pages fetched — Next disables when <code>nextCursorMark</code> stops advancing or the count is exhausted.</li>
+      <li><b>New query:</b> a different query is a new <code>queryKey</code>, so the cache, pointer and cursor history reset together. No stale page can survive a query change.</li>
+    </ul>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>The hook, in outline<span class="lbl-tag">useArticleSearch</span></summary>
+      <div class="det-body">
+        <p class="file-cap">hooks/useArticleSearch.ts — outline</p>
+<pre><span class="k">function</span> <span class="t">useArticleSearch</span>(query: <span class="t">string</span>) {
+  <span class="k">const</span> q = <span class="t">useInfiniteQuery</span>({
+    queryKey: [<span class="s">"articles"</span>, query],
+    queryFn: ({ pageParam }) =&gt; <span class="t">searchArticles</span>(query, pageParam ?? <span class="s">"*"</span>),
+    initialPageParam: <span class="s">"*"</span>,
+    getNextPageParam: (last) =&gt; last.nextCursorMark ?? <span class="k">undefined</span>,
+    enabled: query.trim().length &gt; <span class="t">0</span>,   <span class="c">// no request for an empty query</span>
+  });
+
+  <span class="k">const</span> [page, setPage] = <span class="t">useState</span>(<span class="t">0</span>);
+  <span class="k">const</span> next = () =&gt; { <span class="k">if</span> (page === q.data.pages.length - <span class="t">1</span>) q.fetchNextPage(); setPage(p =&gt; p + <span class="t">1</span>); };
+  <span class="k">const</span> prev = () =&gt; setPage(p =&gt; <span class="t">Math</span>.max(<span class="t">0</span>, p - <span class="t">1</span>));  <span class="c">// cache hit, no fetch</span>
+
+  <span class="k">return</span> { results: q.data?.pages[page]?.resultList.result ?? [],
+           status: q.status, page, hasPrev: page &gt; <span class="t">0</span>, hasNext: /* …count/cursor check */, next, prev };
+}</pre>
+        <p class="prose" style="margin-top:.7rem">The outline is the contract, not the final code — it shows that forward fetch, backward-by-pointer, the empty-query guard and the per-query reset all fall out of the library plus one small piece of state.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 05 ============================================================= -->
+  <section class="sheet" id="query">
+    <div class="sh"><span class="rn">05</span><h2>Query builder</h2><span class="size">Half A</span></div>
+    <p class="lede">The builder holds an ordered list of terms. Each term after the first carries the operator that joins it to what came before. Two pure functions turn that list into the string the user sees and the string the API receives — the same source, two renderings.</p>
+
+    <p class="file-cap">article-search.types.ts</p>
+<pre><span class="k">type</span> <span class="t">Operator</span> = <span class="s">"AND"</span> | <span class="s">"OR"</span> | <span class="s">"NOT"</span>;
+<span class="k">type</span> <span class="t">Term</span> = { id: <span class="t">string</span>; value: <span class="t">string</span>; op: <span class="t">Operator</span> | <span class="k">null</span> };  <span class="c">// op is null on the first term only</span></pre>
+
+    <div class="diagram">
+      <div class="cap"><span class="dot"></span>Term list → two strings</div>
+      <div class="flow">
+        <div class="fnode"><span class="step">terms[]</span><b>["cancer", AND "immunotherapy", NOT "melanoma"]</b>The ordered source of truth.</div>
+        <span class="farrow">→</span>
+        <div class="fnode ui"><span class="step">display</span><b>cancer AND immunotherapy NOT melanoma</b>Shown live under the input, announced via aria-live.</div>
+        <div class="fnode data" style="margin-left:.5rem"><span class="step">api query</span><b>cancer AND immunotherapy NOT melanoma</b>URL-encoded, sent as <code>query</code>.</div>
+      </div>
+      <p class="prose" style="font-size:.84rem;color:var(--ink-3);margin-top:.4rem">For this prototype the display and API strings are the same literal boolean form the brief shows. Keeping them as two functions over one source means either can change later (quoting a phrase, parenthesising an OR group) without touching the other.</p>
+    </div>
+
+    <ul class="clean">
+      <li><b>Add</b> pushes a term with the chosen operator; the first term's operator is <code>null</code>.</li>
+      <li><b>Remove</b> drops a term by id; if the first is removed, the new first term's operator is cleared so the string never starts with an operator.</li>
+      <li><b>Edit</b> changes a term's text or operator in place.</li>
+      <li><b>Empty</b> list renders an empty query and the results panel shows its resting state — no request is made.</li>
+    </ul>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Edge rules the builder guarantees<span class="lbl-tag">invariants</span></summary>
+      <div class="det-body">
+        <ul class="clean">
+          <li>The query string never begins or ends with an operator.</li>
+          <li>Removing the only term returns to the empty resting state, not a broken query.</li>
+          <li>A phrase with spaces is treated as one term, not split into two keywords.</li>
+          <li>Whitespace-only input is rejected before it becomes a term.</li>
+        </ul>
+        <p class="prose" style="margin-top:.6rem">These are exactly the cases the unit tests in section 08 cover, because they are where a naive join breaks.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 06 ============================================================= -->
+  <section class="sheet" id="state">
+    <div class="sh"><span class="rn">06</span><h2>State &amp; data flow</h2><span class="size">Runtime</span></div>
+    <p class="lede">Four pieces of state, each owned in one place: the term list, the server cache and status (TanStack Query), the page pointer (the search hook), and the URL, which mirrors the query and page so a search is shareable. Nothing global, no store.</p>
+
+    <div class="diagram">
+      <div class="cap"><span class="dot"></span>One search, end to end</div>
+      <div class="flow">
+        <div class="fnode"><span class="step">1 · input</span><b>User edits terms</b>Reducer updates the term list.</div>
+        <span class="farrow">→</span>
+        <div class="fnode ui"><span class="step">2 · derive</span><b>buildApiQuery(terms)</b>Pure, memoised.</div>
+        <span class="farrow">→</span>
+        <div class="fnode data"><span class="step">3 · fetch</span><b>useInfiniteQuery</b>Keyed on the query string; dedupes and caches.</div>
+        <span class="farrow">→</span>
+        <div class="fnode cache"><span class="step">4 · page</span><b>pointer picks a page</b>Prev reads cache; Next may fetch.</div>
+        <span class="farrow">→</span>
+        <div class="fnode ui"><span class="step">5 · render</span><b>StatusView / ResultsList</b>Driven by status + current page.</div>
+      </div>
+    </div>
+
+    <h3 class="k"><span class="bar"></span>The four render states</h3>
+    <div class="states">
+      <div class="st loading"><span class="nm">loading</span>Request in flight. Skeleton rows + a polite "Searching…" announcement.</div>
+      <div class="st ok"><span class="nm">success · results</span>The ruled result list for the current page, with pagination.</div>
+      <div class="st empty"><span class="nm">success · empty</span>Zero hits. A designed empty state naming the query and suggesting a change.</div>
+      <div class="st error"><span class="nm">error</span>Network or non-2xx. Plain message + a Retry that refetches.</div>
+    </div>
+    <p class="prose">A fifth resting state — no query yet — shows what the workspace does and invites the first term, so the first frame is never a blank shell.</p>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Why status comes from the query, not from hand-rolled flags<span class="lbl-tag">async handling</span></summary>
+      <div class="det-body">
+        <p class="prose">A naive version keeps <code>isLoading</code>, <code>error</code> and <code>data</code> as separate <code>useState</code> values and risks them drifting out of sync — a spinner left on after an error, a stale result shown under a new query. Deriving the render state from the query's single <code>status</code> (<code>pending</code> / <code>error</code> / <code>success</code>) makes those contradictions unrepresentable. The empty state is <code>success</code> with zero results, kept distinct from the loading and error states. This is the clearest reason TanStack Query earns its place for even one endpoint.</p>
+      </div>
+    </details>
+
+    <h3 class="k"><span class="bar"></span>URL as shareable state</h3>
+    <p class="prose">The brief does not ask for it, but a research search is the textbook case for URL state: a researcher who finds a useful result set wants to bookmark or send the link. So the query terms and the current page live in the URL, and a shared link restores the exact search.</p>
+    <div class="rows">
+      <div class="rec"><span class="k">What is synced</span><div class="v"><p>The term list, encoded so chips and operators restore exactly (<code>?terms=cancer~AND:immunotherapy~NOT:melanoma</code>), and the page as a 1-based <code>&amp;page=N</code>.</p></div></div>
+      <div class="rec"><span class="k">How</span><div class="v"><p><code>useUrlState</code> reads the initial state once on mount and mirrors every change with <code>history.replaceState</code> — no router dependency, no history spam.</p></div></div>
+      <div class="rec"><span class="k">Deep page restore</span><div class="v"><p>The cursor is forward-only, so a restored <code>page=3</code> is reached by walking the cursor forward until that page is loaded, then landing on it (or on the last available page if the target is beyond the results).</p></div></div>
+    </div>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Why encode terms, not the flat query string<span class="lbl-tag">decision</span></summary>
+      <div class="det-body">
+        <p class="prose">The flat query (<code>cancer AND immunotherapy</code>) would be prettier in the URL, but restoring it means re-parsing a boolean string back into chips — lossy and fiddly to edit. Encoding the structured term list instead means the builder restores to the exact same editable chips the user left, which is the state that actually matters. The encode/decode pair is pure and unit-tested on its own.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- 07 ============================================================= -->
+  <section class="sheet" id="a11y">
+    <div class="sh"><span class="rn">07</span><h2>Accessibility</h2><span class="size">Built in</span></div>
+    <p class="lede">Accessibility is in the brief's requirements, not an afterthought. The result list is a record surface, so it has to be navigable and announced, not just visible.</p>
+    <div class="rows">
+      <div class="rec"><span class="k">Query builder</span><div class="v">Labelled input and operator control. Each term chip has an accessible remove button with a name like "Remove melanoma".</div></div>
+      <div class="rec"><span class="k">Live query</span><div class="v">The constructed query sits in an <code>aria-live="polite"</code> region, so screen readers hear it change as terms are added.</div></div>
+      <div class="rec"><span class="k">Results</span><div class="v">An ordered list of articles. Each title is a real link to the article. Result count and page position announced on change.</div></div>
+      <div class="rec"><span class="k">States</span><div class="v">Loading, empty and error are announced through a status region; errors use <code>role="alert"</code> so they interrupt politely.</div></div>
+      <div class="rec"><span class="k">Keyboard</span><div class="v">Everything operable without a mouse; visible focus rings; pagination buttons disable rather than vanish at the ends.</div></div>
+      <div class="rec"><span class="k">Reduced motion</span><div class="v"><code>prefers-reduced-motion</code> respected — skeleton shimmer and chevron rotation stop.</div></div>
+    </div>
+  </section>
+
+  <!-- 08 ============================================================= -->
+  <section class="sheet" id="testing">
+    <div class="sh"><span class="rn">08</span><h2>Test design</h2><span class="size">Vitest · RTL · MSW</span></div>
+    <p class="lede">Depth placed where the brief points — query construction, results navigation, API failure — rather than spread thin for a coverage number. The layering in section 03 is what makes each of these cheap to test. The network is mocked with MSW, so no test touches the real endpoint.</p>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>Target</th><th>Level</th><th>What it proves</th></tr></thead>
+        <tbody>
+          <tr><td><b>Query construction</b></td><td class="mono">unit</td><td>Pure <code>buildApiQuery</code> / <code>buildDisplayQuery</code>: AND/OR/NOT joins; add; remove; remove-first clears the leading operator; single term; empty; phrase kept whole.</td></tr>
+          <tr><td><b>Results navigation</b></td><td class="mono">component</td><td>Next advances a page and requests the next cursor; Previous returns to a cached page with no refetch; buttons disable at the ends.</td></tr>
+          <tr><td><b>API failure</b></td><td class="mono">component</td><td>A mocked rejected / non-2xx fetch renders the error state, announces it, and Retry issues a fresh request.</td></tr>
+          <tr><td><b>URL state</b></td><td class="mono">unit + integration</td><td>Terms encode/decode round-trips; the hook reads terms + page from the URL and writes them back; a shared link restores the exact search on load.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <details>
+      <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>How the network is faked<span class="lbl-tag">MSW</span></summary>
+      <div class="det-body">
+        <p class="prose">MSW intercepts the request at the network level and returns fixed fixtures — a page with results, an empty page, a 500 — so no test touches the real endpoint. The server runs with <code>onUnhandledRequest: "error"</code>, so any un-mocked request fails the test loudly. Navigation tests count the intercepted requests, which is what distinguishes a cache hit on Previous from a refetch on Next.</p>
+      </div>
+    </details>
+
+    <p class="prose" style="margin-top:.8rem"><b>Deliberately not tested:</b> exhaustive operator permutations, visual styling, and the live API itself. The brief values thoughtful prioritisation over unnecessary coverage; what's left out is written down rather than left silent.</p>
+  </section>
+
+  <!-- 09 ============================================================= -->
+  <section class="sheet" id="decisions">
+    <div class="sh"><span class="rn">09</span><h2>Decisions &amp; trade-offs</h2><span class="size">ADR</span></div>
+    <p class="lede">The calls I made, each with the reason and the alternative. These are the things the follow-up interview is most likely to probe, so each is stated plainly.</p>
+
+    <div class="decs">
+      <div class="dec"><span class="d">Framework</span><div><b>React + TypeScript + Vite.</b><span class="why">Matches the role ("React, Vue or equivalent"), the stack I'm fastest and most careful in, and an instant Vite dev loop. TS makes the API response shape a contract the components can rely on.</span></div></div>
+      <div class="dec"><span class="d">Architecture</span><div><b>Feature-Sliced Design + Tailwind, per my team standard.</b><span class="why">Even for one screen I follow the same conventions I build production apps with — FSD folders, Tailwind with brand tokens, an <code>@icons</code> proxy, meemaw, strict no-<code>any</code>, inline errors, MSW. Nesting stays shallow because there is one feature. It costs little to start this way and shows how I actually work, which is what the exercise is probing.</span></div></div>
+      <div class="dec"><span class="d">Data</span><div><b>TanStack Query, <code>useInfiniteQuery</code>.</b><span class="why">Its cursor model fits a forward-only API exactly, and it turns loading/error/empty into one derived status. For a single endpoint it is close to the minimum that still handles cursors and caching correctly — and it backs the Prev-without-refetch behaviour.</span></div></div>
+      <div class="dec"><span class="d">Paging</span><div><b>Forward fetch + page pointer over the cache.</b><span class="why">The API has no previous cursor, so backward navigation is a client concern. A pointer over cached pages gives instant Prev and avoids re-fetching pages already seen.</span></div></div>
+      <div class="dec alt"><span class="d">Rejected</span><div><b>No Redux or global store.</b><span class="why">Local component state plus the query cache cover everything. A store would be the "unnecessary complexity" the brief warns against, and harder to explain than it's worth here.</span></div></div>
+      <div class="dec alt"><span class="d">Rejected</span><div><b>No infinite scroll.</b><span class="why">The library supports it, but the brief asks for discrete pages of 25 with next/previous. Discrete paging is also easier to make accessible and to reason about.</span></div></div>
+      <div class="dec"><span class="d">URL state</span><div><b>Query and page live in the URL.</b><span class="why">Beyond the brief, but a search a researcher can bookmark or share is exactly the usability the evaluation rewards, and it matches my team's rule to put search terms in the URL. Done with <code>URLSearchParams</code> + <code>replaceState</code>, no router.</span></div></div>
+      <div class="dec"><span class="d">Layout</span><div><b>Results scroll in their own pane.</b><span class="why">The screen is a fixed-height workspace: masthead and query builder stay put while the results list scrolls internally, so paging and the query stay in view instead of the whole page scrolling.</span></div></div>
+      <div class="dec"><span class="d">Scope</span><div><b>Facets &amp; sort are stretch goals.</b><span class="why">Not asked for by the brief. The core query-builder, results, states and tests ship first; filters are added only if time remains.</span></div></div>
+    </div>
+
+    <h3 class="k"><span class="bar"></span>Known limitations, written down not hidden</h3>
+    <ul class="clean">
+      <li><b>Deep paging</b> is forward-only by nature; jumping to page 40 means walking there. Acceptable for a search workflow where users refine rather than skip ahead.</li>
+      <li><b>No query validation UI</b> beyond empty-guarding — the API accepts loose input, so the builder trusts the user's terms.</li>
+      <li><b>Lite fields only</b> — no abstract or author affiliations until a detail view is added (noted as a stretch).</li>
+    </ul>
+  </section>
+
+  <!-- 10 ============================================================= -->
+  <section class="sheet" id="delivery">
+    <div class="sh"><span class="rn">10</span><h2>Delivery &amp; AI use</h2><span class="size">Submission</span></div>
+    <p class="lede">A GitHub repo is the submission. The README is the hub; a lean docs folder holds the thinking; this document is the deep tech spec within it. You deploy the app and this doc via Netlify.</p>
+
+    <p class="file-cap">repository</p>
+<pre><span class="c">repo/</span>
+├─ <span class="k">README.md</span>                 <span class="c"># hub: install · run · test + links to app, this spec, docs/</span>
+├─ src/                      <span class="c"># Feature-Sliced React + TS app (see §03)</span>
+│  ├─ features/article-search/   <span class="c"># screen · parts · api · helpers · utils + collocated __tests__</span>
+│  ├─ shared/                    <span class="c"># services · constants · test-utils (MSW)</span>
+│  └─ ui/                        <span class="c"># icons proxy · logo</span>
+├─ <span class="k">docs/</span>
+│  ├─ tech-spec.html              <span class="c"># THIS document — the deep spec</span>
+│  ├─ task-and-plan.md            <span class="c"># brief in my words + prioritisation</span>
+│  ├─ api-notes.md                <span class="c"># the Europe PMC findings</span>
+│  └─ ai-usage.md                 <span class="c"># 200–300w reflection + final state</span>
+├─ tailwind.config.ts        <span class="c"># EMBL brand tokens</span>
+└─ index.html                <span class="c"># Vite entry</span></pre>
+
+    <div class="rows">
+      <div class="rec"><span class="k">GitHub</span><div class="v">Public repo; the link in the submission email. README is the entry point for any reader.</div></div>
+      <div class="rec"><span class="k">Netlify</span><div class="v">App and this spec deployed from GitHub — two links to share.</div></div>
+      <div class="rec"><span class="k">Order</span><div class="v">App → tests → README → docs form the scored core, finished first. This spec is the deep record of the design; if the clock runs short, what's built still stands alone.</div></div>
+    </div>
+
+    <div class="note ai">
+      <span class="tag">AI use &amp; EMBL policy</span>
+      <p>Claude Code was used for scaffolding, drafting and review, with every line read and the technical calls — the cursor-plus-pointer paging, the Feature-Sliced structure, the test boundaries — made and owned by me. <code>docs/ai-usage.md</code> gives the required 200–300 word reflection: tools used, one suggestion taken, one corrected or rejected, and how the app was verified. EMBL counts pasting assessment materials into AI tools without permission as a confidentiality breach, and live assessments are AI-free — so the follow-up walkthrough is prepared to be done unaided, which this architecture is built to support.</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="mono">Technical specification · JR4637 Front-End Developer, Europe PMC · Oluwaferanmi Adeniji</p>
+    <p>This is the design record, not the submission. The app, README and docs are built from it. API values verified live; EMBL brand values read from ebi.ac.uk and embl.org.</p>
+  </footer>
+
+</main>

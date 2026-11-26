@@ -1,0 +1,530 @@
+<title>Research Search Workspace — Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout concept: a single institutional spec sheet — EMBL-EBI masthead, ruled record rows,
+     one petrol accent, IBM Plex type. Light only, per standing preference and EMBL's own web brand. */
+  :root {
+    --petrol:    #007C82;  /* EBI Petrol — primary accent / masthead */
+    --petrol-dk: #005B60;
+    --blue:      #3B6FB6;  /* EMBL link blue */
+    --blue-dk:   #193F90;
+    --green:     #18974C;  /* EMBL green — "free full text" / done */
+    --amber:     #9A6700;  /* warn / stretch */
+    --bg:        #FFFFFF;
+    --bg-alt:    #F5F6F5;  /* faint cool-grey well */
+    --bg-mast:   #373A36;  /* EBI dark masthead */
+    --ink:       #1A1C1A;  /* body text */
+    --ink-2:     #54585A;  /* metadata */
+    --ink-3:     #767A78;
+    --line:      #D7DAD7;  /* hairlines */
+    --line-soft: #E8EAE8;
+    --sans: "IBM Plex Sans", Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+    --wrap: 60rem;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .gut {
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+
+  /* ---- Masthead ---- */
+  .mast {
+    background: var(--bg-mast);
+    color: #fff;
+    margin-top: calc(-1 * env(safe-area-inset-top, 0px));
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.7rem);
+    padding-bottom: 0.7rem;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px); z-index: 20;
+    background: var(--bg-mast);
+  }
+  .mast-row {
+    max-width: var(--wrap); margin: 0 auto;
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.82rem; letter-spacing: 0.02em;
+  }
+  .mast-mark {
+    width: 20px; height: 20px; flex: none; border-radius: 3px;
+    background: var(--petrol);
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px;
+    padding: 3px;
+  }
+  .mast-mark i { background: rgba(255,255,255,.85); border-radius: 50%; }
+  .mast-mark i:nth-child(5) { background: var(--green); }
+  .mast-sep { color: #8b8f8a; }
+  .mast-row b { font-weight: 600; }
+
+  /* ---- Service bar (petrol) ---- */
+  .svc {
+    background: var(--petrol); color: #fff;
+    padding-top: 1.6rem; padding-bottom: 1.7rem;
+  }
+  .svc-in { max-width: var(--wrap); margin: 0 auto; }
+  .svc .eyebrow {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: rgba(255,255,255,.82); margin: 0 0 0.5rem;
+  }
+  .svc h1 {
+    font-size: clamp(1.6rem, 5vw, 2.3rem); line-height: 1.12;
+    font-weight: 600; margin: 0; text-wrap: balance; letter-spacing: -0.01em;
+  }
+  .svc .sub { margin: 0.7rem 0 0; max-width: 46ch; color: rgba(255,255,255,.92); font-size: 1.02rem; }
+  .meta-strip {
+    max-width: var(--wrap); margin: 1.3rem auto 0;
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem;
+    font-size: 0.8rem; color: rgba(255,255,255,.9);
+  }
+  .meta-strip span { display: inline-flex; gap: 0.4rem; align-items: baseline; }
+  .meta-strip b { font-family: var(--mono); font-weight: 500; color: #fff; }
+
+  /* ---- Main column ---- */
+  main { max-width: var(--wrap); margin: 0 auto; padding-top: 2.2rem; padding-bottom: 4rem; }
+
+  section { margin-bottom: 2.6rem; scroll-margin-top: 1rem; }
+  .sec-head { display: flex; align-items: baseline; gap: 0.7rem; margin: 0 0 0.3rem; }
+  .sec-no {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--petrol);
+    font-weight: 600; letter-spacing: 0.06em; flex: none;
+  }
+  h2 {
+    font-size: 1.28rem; font-weight: 600; margin: 0; letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .sec-lede { color: var(--ink-2); margin: 0.1rem 0 1.1rem; max-width: 64ch; }
+  h3 {
+    font-size: 1rem; font-weight: 600; margin: 1.5rem 0 0.5rem;
+  }
+  p { margin: 0.7rem 0; max-width: 68ch; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { color: var(--blue-dk); text-decoration: underline; }
+  code, .mono { font-family: var(--mono); font-size: 0.88em; }
+  code {
+    background: var(--bg-alt); border: 1px solid var(--line-soft);
+    border-radius: 4px; padding: 0.05em 0.35em;
+  }
+  strong { font-weight: 600; }
+
+  /* ---- Contents nav ---- */
+  .toc {
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem 1.1rem; margin-bottom: 2.4rem; background: var(--bg-alt);
+  }
+  .toc h4 {
+    margin: 0 0 0.6rem; font-family: var(--mono); font-size: 0.72rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); font-weight: 600;
+  }
+  .toc ol {
+    margin: 0; padding: 0; list-style: none;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.35rem 1.4rem;
+    counter-reset: toc;
+  }
+  .toc li { counter-increment: toc; font-size: 0.92rem; }
+  .toc li a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono); color: var(--petrol); margin-right: 0.6rem; font-size: 0.82em;
+  }
+
+  /* ---- Callout ---- */
+  .note {
+    border-left: 3px solid var(--petrol); background: var(--bg-alt);
+    padding: 0.9rem 1.1rem; border-radius: 0 6px 6px 0; margin: 1.2rem 0;
+  }
+  .note.warn { border-left-color: var(--amber); }
+  .note.good { border-left-color: var(--green); }
+  .note p { margin: 0.3rem 0; max-width: none; }
+  .note .tag {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+    text-transform: uppercase; font-weight: 600; color: var(--petrol-dk);
+    display: block; margin-bottom: 0.3rem;
+  }
+  .note.warn .tag { color: var(--amber); }
+  .note.good .tag { color: var(--green); }
+
+  /* ---- Record rows (the ibeji "record" idiom, EMBL-branded) ---- */
+  .rows { border-top: 1px solid var(--line); margin: 1rem 0; }
+  .row {
+    display: grid; grid-template-columns: 9.5rem 1fr;
+    gap: 0.4rem 1.4rem; padding: 0.8rem 0;
+    border-bottom: 1px solid var(--line-soft); align-items: baseline;
+  }
+  .row .k {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--ink-2);
+    letter-spacing: 0.02em; text-transform: uppercase;
+  }
+  .row .v { margin: 0; }
+  .row .v p:first-child { margin-top: 0; }
+  .row .v p:last-child { margin-bottom: 0; }
+
+  /* ---- Table ---- */
+  .tbl-wrap { overflow-x: auto; margin: 1rem 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 34rem; font-size: 0.92rem; }
+  th, td {
+    text-align: left; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink-2); border-bottom: 1px solid var(--line);
+    font-weight: 600; background: var(--bg-alt);
+  }
+  td.mono, th.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: var(--bg-alt); }
+
+  /* ---- Code block ---- */
+  pre {
+    background: #1d201d; color: #e8eae8; border-radius: 8px;
+    padding: 1rem 1.1rem; overflow-x: auto; margin: 1rem 0;
+    font-family: var(--mono); font-size: 0.84rem; line-height: 1.6;
+  }
+  pre .c { color: #8ba08b; }   /* comment */
+  pre .s { color: #7fd1c4; }   /* string / key */
+  pre .k { color: #9bc7ff; }   /* keyword */
+
+  /* ---- Pill tags ---- */
+  .pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.8rem 0; }
+  .pill {
+    font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.02em;
+    padding: 0.2rem 0.6rem; border-radius: 100px; border: 1px solid var(--line);
+    color: var(--ink-2); background: var(--bg);
+  }
+  .pill.on { border-color: var(--petrol); color: var(--petrol-dk); background: #f0f8f8; }
+  .pill.stretch { border-color: var(--amber); color: var(--amber); background: #fdf7ec; }
+
+  /* ---- Priority list ---- */
+  .prio { list-style: none; padding: 0; margin: 1rem 0; counter-reset: p; }
+  .prio li {
+    counter-increment: p; display: grid; grid-template-columns: 1.9rem 1fr;
+    column-gap: 0.9rem; row-gap: 0.25rem; padding: 0.75rem 0;
+    border-bottom: 1px solid var(--line-soft); align-items: start;
+  }
+  .prio li::before {
+    content: counter(p); font-family: var(--mono); font-weight: 600;
+    color: #fff; background: var(--petrol); border-radius: 6px;
+    width: 1.9rem; height: 1.9rem; display: grid; place-items: center; font-size: 0.85rem;
+    grid-row: 1 / span 2;
+  }
+  .prio li.must::before { background: var(--petrol); }
+  .prio li.stretch-row::before { background: var(--amber); }
+  .prio b { font-weight: 600; grid-column: 2; }
+  .prio small { color: var(--ink-2); display: block; grid-column: 2; }
+
+  /* ---- Two-col feature grid ---- */
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem; margin: 1.1rem 0; }
+  .card {
+    border: 1px solid var(--line); border-radius: 8px; padding: 1rem 1.1rem;
+  }
+  .card h4 { margin: 0 0 0.35rem; font-size: 0.96rem; font-weight: 600; }
+  .card p { margin: 0; font-size: 0.92rem; color: var(--ink-2); max-width: none; }
+  .card .mono-k {
+    font-family: var(--mono); font-size: 0.72rem; color: var(--petrol-dk);
+    letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 0.4rem;
+  }
+
+  /* ---- Swatches ---- */
+  .swatches { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1rem 0; }
+  .sw { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.72rem; }
+  .sw i {
+    width: 3.4rem; height: 2.4rem; border-radius: 6px; border: 1px solid var(--line-soft);
+  }
+  .sw .nm { font-weight: 600; }
+  .sw .hx { font-family: var(--mono); color: var(--ink-2); }
+
+  /* ---- Architecture flow ---- */
+  .flow { margin: 1rem 0; }
+  .flow-box {
+    border: 1px solid var(--line); border-radius: 8px; padding: 0.9rem 1rem; margin-bottom: 0.6rem;
+    background: var(--bg);
+  }
+  .flow-box .lbl {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--petrol-dk); font-weight: 600; display: block; margin-bottom: 0.3rem;
+  }
+  .flow-box p { margin: 0; font-size: 0.9rem; color: var(--ink-2); max-width: none; }
+  .flow-arrow { text-align: center; color: var(--ink-3); font-family: var(--mono); margin: 0.1rem 0; }
+
+  .foot {
+    border-top: 1px solid var(--line); margin-top: 3rem; padding-top: 1.4rem;
+    color: var(--ink-3); font-size: 0.85rem;
+  }
+  .foot .mono { color: var(--ink-2); }
+
+  @media (max-width: 640px) {
+    .toc ol { grid-template-columns: 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+    .row { grid-template-columns: 1fr; gap: 0.1rem; }
+    .row .k { color: var(--petrol-dk); }
+  }
+</style>
+
+<header class="mast">
+  <div class="mast-row gut">
+    <span class="mast-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+    <b>EMBL-EBI</b>
+    <span class="mast-sep">·</span>
+    <span>Europe PMC</span>
+    <span class="mast-sep">·</span>
+    <span>Candidate technical exercise</span>
+  </div>
+</header>
+
+<div class="svc">
+  <div class="svc-in gut">
+    <p class="eyebrow">Implementation plan · JR4637</p>
+    <h1>Research Search Workspace</h1>
+    <p class="sub">A plan for the Europe PMC search prototype — scope, API, architecture, design, testing and delivery, agreed before a line of code.</p>
+  </div>
+  <div class="meta-strip gut">
+    <span>Stack <b>React · TypeScript · Vite</b></span>
+    <span>Budget <b>~3 hours</b></span>
+    <span>API <b>Europe PMC REST</b></span>
+    <span>Deploy <b>GitHub → Netlify</b></span>
+  </div>
+</div>
+
+<main class="gut">
+
+  <nav class="toc" aria-label="Contents">
+    <h4>Contents</h4>
+    <ol>
+      <li><a href="#brief">The brief, in my words</a></li>
+      <li><a href="#api">How the API works</a></li>
+      <li><a href="#scope">Scope &amp; priorities</a></li>
+      <li><a href="#arch">Architecture</a></li>
+      <li><a href="#design">Design &amp; brand</a></li>
+      <li><a href="#testing">Testing</a></li>
+      <li><a href="#deliver">Deliverables &amp; delivery</a></li>
+      <li><a href="#ai">AI use &amp; policy</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="brief">
+    <div class="sec-head"><span class="sec-no">01</span><h2>The brief, in my words</h2></div>
+    <p class="sec-lede">Build a prototype <strong>Research Search Workspace</strong> on the Europe PMC Articles REST API, for a researcher who wants to build and refine a literature search without learning query syntax.</p>
+
+    <h3>Two halves</h3>
+    <div class="grid2">
+      <div class="card">
+        <span class="mono-k">A · Query builder</span>
+        <h4>Assemble a query visually</h4>
+        <p>Enter a keyword or phrase. Combine terms with AND / OR / NOT. Show the resulting query as it is constructed. Remove terms and refine.</p>
+      </div>
+      <div class="card">
+        <span class="mono-k">B · Results explorer</span>
+        <h4>Read and page the results</h4>
+        <p>Fetch matching publications. Show title, authors, publication year and a link to each article. 25 per page with next / previous. Handle loading, empty and error states, accessibly.</p>
+      </div>
+    </div>
+
+    <h3>What they are actually assessing</h3>
+    <p>Functional correctness, maintainable component structure and clear state management, async handling, tests for the behaviours that matter, and — stated twice in the brief — <strong>how I prioritise</strong>. Their words: “a well-reasoned, partially completed solution is preferable to a feature-complete application that you cannot explain or maintain.” There is a follow-up interview where they walk through the code and may ask for a live change, so everything here has to be explainable and mine.</p>
+
+    <div class="note warn">
+      <span class="tag">One thing to confirm by eye</span>
+      <p>The invitation email is addressed “to Mohamed” and the reviewer is Mohamed Selim (<code>mselim@ebi.ac.uk</code>). Worth a glance that the invite and the submission address are right before sending three hours of work.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="api">
+    <div class="sec-head"><span class="sec-no">02</span><h2>How the API works</h2></div>
+    <p class="sec-lede">Verified against the live endpoint, not recalled. The findings here drive the architecture that follows.</p>
+
+    <p>Base: <code>GET https://www.ebi.ac.uk/europepmc/webservices/rest/search</code> — no auth, no backend, CORS-friendly for a browser app.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Param</th><th>Value</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">query</td><td class="mono">cancer AND immunotherapy NOT melanoma</td><td>Boolean operators are applied literally. Hit count fell from 5.6M to 280K once AND/NOT were added, so they really filter.</td></tr>
+          <tr><td class="mono">format</td><td class="mono">json</td><td>—</td></tr>
+          <tr><td class="mono">pageSize</td><td class="mono">25</td><td>Matches the brief.</td></tr>
+          <tr><td class="mono">cursorMark</td><td class="mono">* then next</td><td>The pagination mechanism. See below.</td></tr>
+          <tr><td class="mono">resultType</td><td class="mono">lite / core</td><td><code>lite</code> gives title, authorString, pubYear, id, source — enough for the list. <code>core</code> adds authorList and abstract if a detail view is added later.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="tag">The decisive finding — pagination is forward-only</span>
+      <p>The response returns a <code>nextCursorMark</code>. To get the next page you resend the request with <code>cursorMark=&lt;that value&gt;</code>. There is <strong>no previous cursor and no page/offset parameter</strong> — the API only moves forward. So “previous” navigation has to be built on the client by remembering the cursor marks we have already seen. This is the single most important design decision in the task, and exactly the kind of technical judgement they are scoring.</p>
+    </div>
+
+    <h3>Other verified behaviours</h3>
+    <div class="rows">
+      <div class="row"><span class="k">Total count</span><div class="v"><p><code>hitCount</code> gives the total, so we can show “about N results” and know when the last page is reached.</p></div></div>
+      <div class="row"><span class="k">Article link</span><div class="v"><p>Build <code>https://europepmc.org/article/{source}/{id}</code> from each result — e.g. <code>MED/42888301</code>.</p></div></div>
+      <div class="row"><span class="k">Error reality</span><div class="v"><p>The API is lenient: an empty query and a malformed query both return HTTP 200. So real failures come from the <strong>network</strong> — fetch rejection, non-2xx, timeout — not from bad input. The error state and its test are built around that, not around the API rejecting a query.</p></div></div>
+    </div>
+
+    <pre><span class="c"># Verified request — page one</span>
+GET /europepmc/webservices/rest/search?<span class="s">query</span>=cancer+AND+immunotherapy+NOT+melanoma&amp;<span class="s">format</span>=json&amp;<span class="s">pageSize</span>=25&amp;<span class="s">cursorMark</span>=*
+
+<span class="c"># Response (trimmed)</span>
+{ <span class="s">"hitCount"</span>: 280474,
+  <span class="s">"nextCursorMark"</span>: <span class="s">"AoIIQEV1pCg1Njk3NTY2Nw=="</span>,   <span class="c">// feed this back to get page two</span>
+  <span class="s">"resultList"</span>: { <span class="s">"result"</span>: [ { <span class="s">"id"</span>, <span class="s">"source"</span>, <span class="s">"title"</span>, <span class="s">"authorString"</span>, <span class="s">"pubYear"</span>, <span class="s">"doi"</span>, <span class="s">"pmid"</span> } ] } }</pre>
+  </section>
+
+  <!-- 3 -->
+  <section id="scope">
+    <div class="sec-head"><span class="sec-no">03</span><h2>Scope &amp; priorities</h2></div>
+    <p class="sec-lede">Built in this order so there is always a coherent, demonstrable version — the brief rewards a solid partial over a shaky whole.</p>
+
+    <div class="pills">
+      <span class="pill on">Query builder</span>
+      <span class="pill on">Results list</span>
+      <span class="pill on">Next / prev</span>
+      <span class="pill on">Loading · empty · error</span>
+      <span class="pill on">Accessibility</span>
+      <span class="pill on">Tests</span>
+      <span class="pill stretch">Left facet rail</span>
+      <span class="pill stretch">Sort control</span>
+      <span class="pill stretch">Combined doc page</span>
+    </div>
+
+    <ol class="prio">
+      <li class="must"><b>API layer + search hook</b><small>Typed client and the fetch hook, confirmed against the real endpoint.</small></li>
+      <li class="must"><b>Query builder</b><small>Add / remove terms, AND/OR/NOT between them, live query string shown as it is built.</small></li>
+      <li class="must"><b>Results list + pagination</b><small>Title, authors, year, article link; 25 per page; next / prev via remembered cursors.</small></li>
+      <li class="must"><b>Loading, empty and error states</b><small>Each a real designed state, announced to assistive technology.</small></li>
+      <li class="must"><b>Accessibility pass</b><small>Labels, roles, keyboard operation, a live region for result and error announcements.</small></li>
+      <li class="must"><b>Tests</b><small>The three the brief names: query construction, results navigation, API failure.</small></li>
+      <li class="stretch-row"><b>Stretch — facet rail &amp; sort</b><small>Europe PMC has full-text / type / date filters and a relevance / date / cited sort. The brief does not require them; added only if time remains.</small></li>
+    </ol>
+
+    <div class="note good">
+      <span class="tag">Prioritisation rule</span>
+      <p>Everything above the amber row is the scored core and ships first. The facet rail is deliberately a stretch goal — adding filters the brief never asked for is the clearest way to over-scope a three-hour exercise.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="arch">
+    <div class="sec-head"><span class="sec-no">04</span><h2>Architecture</h2></div>
+    <p class="sec-lede">A small, flat structure. Each decision below is one I can defend in the walkthrough.</p>
+
+    <div class="flow">
+      <div class="flow-box"><span class="lbl">Query builder state</span><p><code>useReducer</code> over a list of terms, each with its operator. Pure functions turn the term list into the display string and the API query string — these are unit-tested in isolation.</p></div>
+      <div class="flow-arrow">↓ query string</div>
+      <div class="flow-box"><span class="lbl">Data layer — TanStack Query</span><p><code>useInfiniteQuery</code> keyed on the query. <code>getNextPageParam</code> returns <code>nextCursorMark</code> — the library is built for exactly this cursor shape. It gives caching, loading and error status and request dedupe for free.</p></div>
+      <div class="flow-arrow">↓ cached pages + a page pointer</div>
+      <div class="flow-box"><span class="lbl">Pagination</span><p>The API is forward-only, so “Next” fetches the next cursor page and “Previous” just moves a page pointer back to an already-cached page. Backward navigation with no backward API — resolved by the cache.</p></div>
+      <div class="flow-arrow">↓ current page of 25</div>
+      <div class="flow-box"><span class="lbl">Presentation</span><p>Results list of ruled record rows; status-driven loading / empty / error views; the query builder panel. Presentational components take data as props and stay testable.</p></div>
+    </div>
+
+    <h3>Key decisions</h3>
+    <div class="rows">
+      <div class="row"><span class="k">React + TS</span><div class="v"><p>Matches the job (“React, Vue or equivalent”) and is the stack I am fastest and most careful in. Vite for an instant dev loop and a clean build.</p></div></div>
+      <div class="row"><span class="k">TanStack Query</span><div class="v"><p>Turns forward-cursor paging, caching and the loading/error states into configuration rather than hand-rolled effects. For a single endpoint it is close to the minimum that still handles cursors well.</p></div></div>
+      <div class="row"><span class="k">No Redux</span><div class="v"><p>Local component state and the query cache cover everything. A global store would be the “unnecessary complexity” the brief warns against.</p></div></div>
+      <div class="row"><span class="k">Pure query functions</span><div class="v"><p>Term-list → display string and → API string are pure and separately tested, so the builder’s logic is verified without rendering anything.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="design">
+    <div class="sec-head"><span class="sec-no">05</span><h2>Design &amp; brand</h2></div>
+    <p class="sec-lede">The prototype should read as if it belongs to Europe PMC. The approach: borrow a proven structure from my own design shelf, then dress it in EMBL-EBI’s real brand — read from their live stylesheets, not matched by guesswork.</p>
+
+    <h3>The brand, from EMBL-EBI’s own CSS</h3>
+    <p>EMBL’s web typeface is <strong>IBM Plex Sans</strong> with <strong>IBM Plex Mono</strong> for identifiers (122 font declarations across ebi.ac.uk and embl.org). The service accent is EBI Petrol; links are EMBL blue; “free full text” status is EMBL green. Light theme throughout, dense and institutional, results rendered as a plain ruled list rather than heavy cards.</p>
+
+    <div class="swatches">
+      <div class="sw"><i style="background:#007C82"></i><span class="nm">EBI Petrol</span><span class="hx">#007C82</span></div>
+      <div class="sw"><i style="background:#3B6FB6"></i><span class="nm">EMBL Blue</span><span class="hx">#3B6FB6</span></div>
+      <div class="sw"><i style="background:#18974C"></i><span class="nm">EMBL Green</span><span class="hx">#18974C</span></div>
+      <div class="sw"><i style="background:#1A1C1A"></i><span class="nm">Ink</span><span class="hx">#1A1C1A</span></div>
+      <div class="sw"><i style="background:#54585A"></i><span class="nm">Metadata</span><span class="hx">#54585A</span></div>
+      <div class="sw"><i style="background:#D0D0CE;border-color:#bbb"></i><span class="nm">Hairline</span><span class="hx">#D0D0CE</span></div>
+    </div>
+
+    <h3>The structure we borrow</h3>
+    <p>The base is my <strong>Ìbejì</strong> system, whose organising law is “territory versus record”: record surfaces are ruled rows in IBM Plex Mono with no ornament. A literature result list is a record surface — ruled rows of titles, authors, identifiers and years — so the fit is structural, not cosmetic. We keep that record idiom and recolour its teal to EBI Petrol; we drop its ceremonial serif, since EMBL’s chrome is pure Plex Sans. The result is a workspace that looks native to Europe PMC while standing on a system I can explain end to end.</p>
+
+    <div class="note">
+      <span class="tag">A single result row</span>
+      <p>Title as a blue/petrol link in slightly heavier weight · authors on one muted grey line · journal and year muted beneath · a links row carrying the article link, PMID and DOI in IBM Plex Mono · thin hairline separators, no boxed cards. This mirrors how Europe PMC itself lays out results.</p>
+    </div>
+
+    <p class="mono" style="color:var(--ink-3);font-size:0.82rem">Light theme only — EMBL’s web surface is light, and it matches the standing preference.</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="testing">
+    <div class="sec-head"><span class="sec-no">06</span><h2>Testing</h2></div>
+    <p class="sec-lede">Vitest with React Testing Library. Depth placed where the brief points, not spread thin.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>What</th><th>How</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td>Query construction</td><td>Unit tests on the pure term-list → string functions: AND/OR/NOT, add, remove, single term, empty.</td><td>The builder’s core logic, named by the brief.</td></tr>
+          <tr><td>Results navigation</td><td>Component test: next advances a page and requests the next cursor; previous returns to a cached page without a refetch.</td><td>Proves the forward-cursor-plus-cache design works.</td></tr>
+          <tr><td>API failure</td><td>Mock a rejected / non-2xx fetch and assert the error state renders and is announced.</td><td>The real failure mode, since the API accepts bad queries.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Not every edge case — the brief explicitly values thoughtful prioritisation over exhaustive coverage. What is left out is written down in the docs rather than left silent.</p>
+  </section>
+
+  <!-- 7 -->
+  <section id="deliver">
+    <div class="sec-head"><span class="sec-no">07</span><h2>Deliverables &amp; delivery</h2></div>
+    <p class="sec-lede">A GitHub repo is the submission. The README is the hub; a lean docs folder holds the thinking; one hosted page presents it.</p>
+
+    <pre><span class="c">repo/</span>
+├─ <span class="k">README.md</span>            <span class="c"># hub: install · run · test + links to app, doc, docs/</span>
+├─ src/                 <span class="c"># React + TS + Vite app</span>
+├─ src/__tests__/       <span class="c"># Vitest + RTL: query, navigation, API failure</span>
+├─ <span class="k">docs/</span>
+│  ├─ task-and-plan.md       <span class="c"># brief in my words + scope + prioritisation</span>
+│  ├─ api-notes.md           <span class="c"># the Europe PMC findings above</span>
+│  ├─ decisions-and-testing.md <span class="c"># ADRs + what is / isn't tested</span>
+│  └─ ai-usage.md            <span class="c"># 200–300w reflection + final state</span>
+└─ <span class="k">doc.html</span>            <span class="c"># one hosted page: Overview ▸ Technical ▸ links</span></pre>
+
+    <div class="rows">
+      <div class="row"><span class="k">GitHub</span><div class="v"><p>Public repo. The link in the submission email; the README is the entry point for any reader.</p></div></div>
+      <div class="row"><span class="k">Netlify</span><div class="v"><p>You deploy the app and the combined doc from GitHub. Two links to share.</p></div></div>
+      <div class="row"><span class="k">Combined doc</span><div class="v"><p>One hosted HTML page: an Overview section for the hiring manager and UX colleagues on top, a technical deep-dive for the reviewer below, with links back to the app, repo and docs. Built last, so the scored core is never at risk.</p></div></div>
+    </div>
+
+    <div class="note good">
+      <span class="tag">Order of delivery</span>
+      <p>App → tests → README → docs markdown form the scored core and are finished first. The hosted doc page is polish on top. If the clock runs out, what is already done still stands on its own.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="ai">
+    <div class="sec-head"><span class="sec-no">08</span><h2>AI use &amp; policy</h2></div>
+    <p class="sec-lede">The brief encourages AI tools; EMBL’s policy sets the frame. Both are satisfied by being honest and keeping ownership.</p>
+
+    <div class="rows">
+      <div class="row"><span class="k">How</span><div class="v"><p>Claude Code for scaffolding, drafting and review, with every line read and the technical calls — cursor-plus-cache paging, the no-Redux line, the test boundaries — made and owned by me.</p></div></div>
+      <div class="row"><span class="k">Disclosure</span><div class="v"><p><code>docs/ai-usage.md</code> gives the required 200–300 word reflection: tools used, one suggestion taken, one corrected or rejected, and how the app was verified.</p></div></div>
+      <div class="row"><span class="k">Policy care</span><div class="v"><p>EMBL counts pasting assessment materials into AI tools without permission as a confidentiality breach, and live interviews are AI-free. So the follow-up walkthrough is prepared to be done unaided — which the architecture above is built to support.</p></div></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p class="mono">Planning document · JR4637 Front-End Developer, Europe PMC · Oluwaferanmi Adeniji</p>
+    <p>This is the plan, not the submission. The app, README, docs and hosted doc page are built from it.</p>
+  </footer>
+
+</main>

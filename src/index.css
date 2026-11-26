@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html, body { margin: 0; }
+body {
+  font-family: '"IBM Plex Sans"', Helvetica, Arial, sans-serif;
+  background: #ffffff;
+  color: #1A1C1A;
+  -webkit-font-smoothing: antialiased;
+}
+*:focus-visible { outline: 2px solid #007C82; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

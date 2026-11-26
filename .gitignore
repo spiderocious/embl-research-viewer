@@ -1,0 +1,10 @@
+# the EMBL-provided assessment materials — not part of the submission
+assessment/
+
+node_modules/
+dist/
+coverage/
+*.local
+.DS_Store
+*.tsbuildinfo
+.env
