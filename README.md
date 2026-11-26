@@ -15,11 +15,13 @@ pnpm dev          # http://localhost:5173
 ## Checks
 
 ```bash
-pnpm typecheck    # strict TypeScript, no `any`
-pnpm test         # Vitest + React Testing Library + MSW
-pnpm coverage     # coverage report (gate: 80%; actual ~100% lines, 97% branches)
-pnpm build        # production build to dist/
-pnpm test:live    # optional: end-to-end against the REAL Europe PMC API
+pnpm typecheck     # strict TypeScript, no `any`
+pnpm lint          # oxlint
+pnpm format        # prettier --write
+pnpm test          # Vitest + React Testing Library + MSW
+pnpm coverage      # coverage report (gate: 80%; actual ~100% lines, 92% branches)
+pnpm build         # production build to dist/
+pnpm test:live     # optional: end-to-end against the REAL Europe PMC API
 ```
 
 ## How it is built

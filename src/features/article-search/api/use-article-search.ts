@@ -55,7 +55,13 @@ export function useArticleSearch(query: string, initialPage = 0): UseArticleSear
   // until we reach the target page or run out of results.
   useEffect(() => {
     const loaded = q.data?.pages.length ?? 0;
-    if (targetPage > 0 && loaded > 0 && loaded <= targetPage && q.hasNextPage && !q.isFetchingNextPage) {
+    if (
+      targetPage > 0 &&
+      loaded > 0 &&
+      loaded <= targetPage &&
+      q.hasNextPage &&
+      !q.isFetchingNextPage
+    ) {
       void q.fetchNextPage();
     } else if (targetPage > 0 && loaded > targetPage) {
       setPage(Math.min(targetPage, loaded - 1));

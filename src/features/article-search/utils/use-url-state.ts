@@ -50,5 +50,11 @@ export function useUrlState() {
     [terms],
   );
 
-  return { initialTerms: initial.current.terms, initialPage: initial.current.page, terms, setTerms, syncPage };
+  return {
+    initialTerms: initial.current.terms,
+    initialPage: initial.current.page,
+    terms,
+    setTerms,
+    syncPage,
+  };
 }

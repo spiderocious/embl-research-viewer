@@ -13,7 +13,11 @@ describe('encodeTerms', () => {
   });
 
   it('encodes operators for later terms', () => {
-    const terms = [createTerm('cancer', null), createTerm('immunotherapy', 'AND'), createTerm('melanoma', 'NOT')];
+    const terms = [
+      createTerm('cancer', null),
+      createTerm('immunotherapy', 'AND'),
+      createTerm('melanoma', 'NOT'),
+    ];
     expect(encodeTerms(terms)).toBe('cancer~AND:immunotherapy~NOT:melanoma');
   });
 });
@@ -25,7 +29,11 @@ describe('decodeTerms', () => {
   });
 
   it('round-trips with encodeTerms', () => {
-    const terms = [createTerm('cancer', null), createTerm('immunotherapy', 'AND'), createTerm('melanoma', 'NOT')];
+    const terms = [
+      createTerm('cancer', null),
+      createTerm('immunotherapy', 'AND'),
+      createTerm('melanoma', 'NOT'),
+    ];
     const decoded = decodeTerms(encodeTerms(terms));
     expect(buildDisplayQuery(decoded)).toBe('cancer AND immunotherapy NOT melanoma');
     expect(decoded[0]!.op).toBeNull();

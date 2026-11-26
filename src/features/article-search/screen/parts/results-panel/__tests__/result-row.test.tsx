@@ -20,7 +20,12 @@ describe('ResultRow', () => {
     render(
       <ul>
         <ResultRow
-          article={makeArticle({ authorString: 'Okafor B.', pubYear: '2025', pmid: '7', doi: '10.1/x' })}
+          article={makeArticle({
+            authorString: 'Okafor B.',
+            pubYear: '2025',
+            pmid: '7',
+            doi: '10.1/x',
+          })}
         />
       </ul>,
     );
@@ -33,9 +38,7 @@ describe('ResultRow', () => {
   it('omits optional metadata when absent', () => {
     render(
       <ul>
-        <ResultRow
-          article={{ id: '1', source: 'PPR', title: 'Preprint only' }}
-        />
+        <ResultRow article={{ id: '1', source: 'PPR', title: 'Preprint only' }} />
       </ul>,
     );
     expect(screen.queryByText(/PMID/)).not.toBeInTheDocument();

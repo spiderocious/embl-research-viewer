@@ -56,17 +56,13 @@ describe('useArticleSearch', () => {
   });
 
   it('reports empty when there are zero hits', async () => {
-    server.use(
-      http.get(EP.EUROPE_PMC.SEARCH, () => HttpResponse.json(makePage(0, 0))),
-    );
+    server.use(http.get(EP.EUROPE_PMC.SEARCH, () => HttpResponse.json(makePage(0, 0))));
     const { result } = renderHook(() => useArticleSearch('zxqwv'), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.status).toBe('empty'));
   });
 
   it('reports error on a failed request', async () => {
-    server.use(
-      http.get(EP.EUROPE_PMC.SEARCH, () => HttpResponse.json({}, { status: 500 })),
-    );
+    server.use(http.get(EP.EUROPE_PMC.SEARCH, () => HttpResponse.json({}, { status: 500 })));
     const { result } = renderHook(() => useArticleSearch('cancer'), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.status).toBe('error'));
   });

@@ -1,8 +1,8 @@
-import { Repeat } from "meemaw";
-import { formatNumber } from "@shared/utils/format-number";
-import type { UseArticleSearchResult } from "../../../api/use-article-search";
-import { ResultRow } from "./result-row";
-import { Pagination } from "./pagination";
+import { Repeat } from 'meemaw';
+import { formatNumber } from '@shared/utils/format-number';
+import type { UseArticleSearchResult } from '../../../api/use-article-search';
+import { ResultRow } from './result-row';
+import { Pagination } from './pagination';
 
 interface ResultsPanelProps {
   readonly search: UseArticleSearchResult;
@@ -10,26 +10,18 @@ interface ResultsPanelProps {
 
 export function ResultsPanel({ search }: ResultsPanelProps) {
   return (
-    <section
-      aria-labelledby="results-heading"
-      className="flex min-h-0 flex-1 flex-col"
-    >
+    <section aria-labelledby="results-heading" className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-baseline justify-between border-b border-line pb-2">
         <h2 id="results-heading" className="text-base font-semibold text-ink">
           Results
         </h2>
         <p className="text-sm text-ink-2" aria-live="polite">
-          <span className="font-mono font-semibold text-ink">
-            {formatNumber(search.hitCount)}
-          </span>{" "}
+          <span className="font-mono font-semibold text-ink">{formatNumber(search.hitCount)}</span>{' '}
           publications
         </p>
       </div>
 
-      <ul
-        data-testid="results-scroll"
-        className="min-h-0 flex-1 list-none overflow-y-auto"
-      >
+      <ul data-testid="results-scroll" className="min-h-0 flex-1 list-none overflow-y-auto">
         <Repeat each={[...search.results]}>
           {(article) => <ResultRow key={article.id} article={article} />}
         </Repeat>

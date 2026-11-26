@@ -23,13 +23,17 @@ describe('ArticleSearchScreen (integration)', () => {
   it('shows the idle prompt on first load', () => {
     renderWithQuery(<ArticleSearchScreen />);
     expect(screen.getByText(/search 47 million publications/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /find scientific literature/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /find scientific literature/i }),
+    ).toBeInTheDocument();
   });
 
   it('runs a search and shows results with a hit count', async () => {
     renderWithQuery(<ArticleSearchScreen />);
     await searchFor('cancer');
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument(),
+    );
     expect(await screen.findByText('60')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /article number 0/i })).toBeInTheDocument();
   });
@@ -67,7 +71,9 @@ describe('ArticleSearchScreen (integration)', () => {
 
     fail = false;
     await user.click(screen.getByRole('button', { name: /retry/i }));
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument(),
+    );
   });
 
   it('puts the query into the URL as it is built', async () => {
@@ -82,13 +88,17 @@ describe('ArticleSearchScreen (integration)', () => {
     // chips restored
     expect(screen.getByTestId('query-preview')).toHaveTextContent('cancer AND immunotherapy');
     // and the search runs automatically
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument(),
+    );
   });
 
   it('renders the results in their own scroll container', async () => {
     renderWithQuery(<ArticleSearchScreen />);
     await searchFor('cancer');
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Results' })).toBeInTheDocument(),
+    );
     const list = screen.getByTestId('results-scroll');
     expect(list.className).toContain('overflow-y-auto');
   });

@@ -10,7 +10,14 @@ interface PaginationProps {
   readonly onNext: () => void;
 }
 
-export function Pagination({ page, totalPages, hasPrev, hasNext, onPrev, onNext }: PaginationProps) {
+export function Pagination({
+  page,
+  totalPages,
+  hasPrev,
+  hasNext,
+  onPrev,
+  onNext,
+}: PaginationProps) {
   return (
     <nav aria-label="Results pages" className="flex items-center justify-between gap-3 pt-4">
       <Button variant="secondary" onClick={onPrev} disabled={!hasPrev}>

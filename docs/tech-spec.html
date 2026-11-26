@@ -397,6 +397,8 @@ ul.clean li::marker{color:var(--petrol)}
           <li><b>React Query only</b> for server state; zero bare <code>useEffect + fetch</code>.</li>
           <li><b>Endpoints via <code>EP</code> constants</b>, no inline URLs; hyphenated filenames; a feature-boundary barrel only.</li>
           <li><b>Inline errors</b> over toasts.</li>
+          <li><b>Shared utilities, not inline logic</b> — number formatting and other cross-cutting helpers live in <code>shared/utils</code> (e.g. <code>formatNumber</code>), never re-created per component.</li>
+          <li><b>oxlint + Prettier</b> run clean across the codebase; reusable UI (<code>Button</code>, <code>Chip</code>, <code>TextField</code>, <code>SegmentedControl</code>, <code>StatusMessage</code>, <code>Logo</code>) lives in <code>ui/</code> and is composed into the feature.</li>
         </ul>
       </div>
     </details>
@@ -505,11 +507,16 @@ ul.clean li::marker{color:var(--petrol)}
     </div>
 
     <ul class="clean">
-      <li><b>Add</b> pushes a term with the chosen operator; the first term's operator is <code>null</code>.</li>
+      <li><b>Add</b> pushes a term with the chosen operator; the first term's operator is <code>null</code>. <b>Enter</b> adds without reaching for the button.</li>
       <li><b>Remove</b> drops a term by id; if the first is removed, the new first term's operator is cleared so the string never starts with an operator.</li>
-      <li><b>Edit</b> changes a term's text or operator in place.</li>
+      <li><b>Edit the operator in place</b> — each chip after the first exposes a segmented AND / OR / NOT control, so a search is re-shaped without deleting and re-adding terms.</li>
       <li><b>Empty</b> list renders an empty query and the results panel shows its resting state — no request is made.</li>
     </ul>
+
+    <div class="note">
+      <span class="tag">Interaction design</span>
+      <p>The operator is a segmented toggle (a labelled radio group), not a dropdown, so the three choices are visible and one click. The assembled query shows as live chips with tinted operators; a visually-hidden canonical string carries the same query to assistive tech and to tests. On a blank slate, three example queries (including the brief's own <code>cancer AND immunotherapy NOT melanoma</code>) load with one click, so the first search is never a cold start.</p>
+    </div>
 
     <details>
       <summary><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Edge rules the builder guarantees<span class="lbl-tag">invariants</span></summary>

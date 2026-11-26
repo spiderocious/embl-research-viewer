@@ -13,10 +13,7 @@ export function Logo({ className }: LogoProps) {
         className="grid size-5 grid-cols-3 gap-[1.5px] rounded-sm bg-petrol p-[3px]"
       >
         {Array.from({ length: 9 }).map((_, i) => (
-          <span
-            key={i}
-            className={cn('rounded-full', i === 4 ? 'bg-embl-green' : 'bg-white/90')}
-          />
+          <span key={i} className={cn('rounded-full', i === 4 ? 'bg-embl-green' : 'bg-white/90')} />
         ))}
       </span>
       <span className="text-sm font-semibold tracking-wide">EMBL-EBI</span>

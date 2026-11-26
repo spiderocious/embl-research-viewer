@@ -14,11 +14,7 @@ export function makeArticle(overrides: Partial<ArticleResult> = {}): ArticleResu
 }
 
 /** A page of `count` results; cursor points to the next page unless it's the last. */
-export function makePage(
-  count: number,
-  hitCount: number,
-  nextCursorMark?: string,
-): SearchResponse {
+export function makePage(count: number, hitCount: number, nextCursorMark?: string): SearchResponse {
   const result = Array.from({ length: count }, (_, i) =>
     makeArticle({ id: `id-${i}`, pmid: `${i}`, title: `Article number ${i}` }),
   );

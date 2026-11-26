@@ -43,9 +43,7 @@ export function SegmentedControl<T extends string>({
               className={cn(
                 'rounded px-2.5 py-1 font-mono text-xs font-semibold transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-petrol',
-                selected
-                  ? 'bg-petrol text-white shadow-sm'
-                  : 'text-ink-2 hover:text-petrol-dark',
+                selected ? 'bg-petrol text-white shadow-sm' : 'text-ink-2 hover:text-petrol-dark',
               )}
             >
               {option.label}

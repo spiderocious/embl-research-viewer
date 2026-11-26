@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button, Chip, TextField, StatusMessage, Logo } from '../../index';
+import { Button, Chip, TextField, StatusMessage, Logo, SegmentedControl } from '../../index';
 
 describe('Button', () => {
   it('fires onClick', async () => {
@@ -24,7 +24,11 @@ describe('Chip', () => {
   it('renders children and a labelled remove button', async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
-    render(<Chip onRemove={onRemove} removeLabel="Remove cancer">cancer</Chip>);
+    render(
+      <Chip onRemove={onRemove} removeLabel="Remove cancer">
+        cancer
+      </Chip>,
+    );
     expect(screen.getByText('cancer')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Remove cancer' }));
     expect(onRemove).toHaveBeenCalledOnce();
@@ -57,5 +61,48 @@ describe('Logo', () => {
   it('renders the EMBL-EBI wordmark', () => {
     render(<Logo />);
     expect(screen.getByText('EMBL-EBI')).toBeInTheDocument();
+  });
+});
+
+describe('SegmentedControl', () => {
+  it('renders options and marks the selected one', () => {
+    render(
+      <SegmentedControl
+        label="Operator"
+        value="AND"
+        options={[
+          { value: 'AND', label: 'AND' },
+          { value: 'OR', label: 'OR' },
+        ]}
+        onChange={() => {}}
+      />,
+    );
+    const group = screen.getByRole('radiogroup', { name: 'Operator' });
+    expect(within(group).getByRole('radio', { name: 'AND' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    expect(within(group).getByRole('radio', { name: 'OR' })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
+  });
+
+  it('calls onChange when a segment is clicked', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SegmentedControl
+        label="Operator"
+        value="AND"
+        options={[
+          { value: 'AND', label: 'AND' },
+          { value: 'OR', label: 'OR' },
+        ]}
+        onChange={onChange}
+      />,
+    );
+    await user.click(screen.getByRole('radio', { name: 'OR' }));
+    expect(onChange).toHaveBeenCalledWith('OR');
   });
 });
